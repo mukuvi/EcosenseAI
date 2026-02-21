@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import api from '../services/api';
 
 export default function HotspotsPage() {
@@ -15,10 +17,38 @@ export default function HotspotsPage() {
         AI-predicted areas with high likelihood of waste accumulation, based on historical report data.
       </p>
 
-      {/* Map placeholder — integrate Leaflet here */}
+      {/* Hotspot map */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-          <p>Map visualization — integrate <code>react-leaflet</code> with hotspot markers</p>
+        <div className="h-96 rounded-lg overflow-hidden">
+          <MapContainer
+            center={[-1.2921, 36.8219]}
+            zoom={11}
+            style={{ height: '100%', width: '100%' }}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {hotspots.map((h) => (
+              <Circle
+                key={h.id}
+                center={[h.latitude, h.longitude]}
+                radius={h.radius_meters}
+                pathOptions={{
+                  color: h.risk_score > 0.7 ? '#ef4444' : h.risk_score > 0.4 ? '#f59e0b' : '#22c55e',
+                  fillOpacity: 0.3,
+                }}
+              >
+                <Popup>
+                  <strong>Risk: {(h.risk_score * 100).toFixed(0)}%</strong>
+                  <br />
+                  Reports: {h.report_count}
+                  <br />
+                  Radius: {h.radius_meters}m
+                </Popup>
+              </Circle>
+            ))}
+          </MapContainer>
         </div>
       </div>
 
