@@ -70,6 +70,53 @@ exports.create = async (req, res, next) => {
 };
 
 /**
+ * GET /api/reports/mine
+ * Returns only reports created by the authenticated user.
+ */
+exports.listMine = async (req, res, next) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const conditions = ['wr.reporter_id = $1'];
+    const params = [req.user.id];
+
+    if (status) {
+      params.push(status);
+      conditions.push(`wr.status = $${params.length}`);
+    }
+
+    const whereClause = `WHERE ${conditions.join(' AND ')}`;
+
+    params.push(limit, offset);
+
+    const { rows } = await db.query(
+      `SELECT wr.*, u.full_name as reporter_name
+       FROM waste_reports wr
+       JOIN users u ON wr.reporter_id = u.id
+       ${whereClause}
+       ORDER BY wr.created_at DESC
+       LIMIT $${params.length - 1} OFFSET $${params.length}`,
+      params
+    );
+
+    const countResult = await db.query(
+      `SELECT COUNT(*) FROM waste_reports wr ${whereClause}`,
+      params.slice(0, params.length - 2)
+    );
+
+    res.json({
+      reports: rows,
+      total: parseInt(countResult.rows[0].count, 10),
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * GET /api/reports
  */
 exports.list = async (req, res, next) => {

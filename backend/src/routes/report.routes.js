@@ -9,6 +9,19 @@ const router = express.Router();
 // All report routes require authentication
 router.use(authenticate);
 
+// Get current user's reports
+router.get(
+  '/mine',
+  [
+    queryValidator('status').optional().isIn([
+      'pending', 'verified', 'assigned', 'in_progress', 'resolved', 'rejected',
+    ]),
+    queryValidator('page').optional().isInt({ min: 1 }),
+    queryValidator('limit').optional().isInt({ min: 1, max: 100 }),
+  ],
+  reportController.listMine
+);
+
 // Create a new waste report
 router.post(
   '/',
