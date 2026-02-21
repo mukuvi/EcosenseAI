@@ -1,0 +1,4 @@
+# Placeholder directory for trained ML models.
+# Add trained model files here:
+#   - waste_classifier.h5  (CNN waste image classifier)
+#   - hotspot_model.pkl    (hotspot prediction model)

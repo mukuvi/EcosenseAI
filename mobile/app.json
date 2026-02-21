@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "EcoSense AI",
+    "slug": "ecosense-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#16a34a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ke.co.ecosense.ai",
+      "infoPlist": {
+        "NSCameraUsageDescription": "EcoSense AI needs camera access to photograph waste for reporting.",
+        "NSLocationWhenInUseUsageDescription": "EcoSense AI needs your location to tag waste reports accurately."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16a34a"
+      },
+      "package": "ke.co.ecosense.ai",
+      "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
+    },
+    "plugins": [
+      "expo-camera",
+      "expo-location",
+      "expo-image-picker",
+      "expo-secure-store"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+# Root
+node_modules/
+.env
+*.log
+
+# Backend
+backend/node_modules/
+backend/uploads/
+backend/coverage/
+backend/logs/
+
+# Web
+web/node_modules/
+web/dist/
+
+# Mobile
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+
+# AI
+ai/venv/
+ai/__pycache__/
+ai/app/__pycache__/
+ai/models/*.h5
+ai/models/*.pkl
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
