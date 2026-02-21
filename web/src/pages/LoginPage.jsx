@@ -15,8 +15,11 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/');
+      const data = await login(email, password);
+      const role = data.user.role;
+      if (role === 'admin') navigate('/');
+      else if (role === 'field_agent') navigate('/agent');
+      else navigate('/citizen');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {
@@ -29,7 +32,7 @@ export default function LoginPage() {
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">🌍 EcoSense AI</h1>
-          <p className="text-gray-500 mt-2">Admin Dashboard Login</p>
+          <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
 
         {error && (
@@ -44,7 +47,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="admin@ecosense.co.ke"
+              placeholder="you@example.com"
               required
             />
           </div>
