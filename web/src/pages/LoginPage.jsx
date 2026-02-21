@@ -36,6 +36,14 @@ export default function LoginPage() {
           <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
         )}
 
+        {import.meta.env.DEV && (
+          <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-4 text-sm text-green-800">
+            <p className="font-semibold mb-1">Demo Credentials (after seeding)</p>
+            <p>Email: <span className="font-mono">admin@ecosense.co.ke</span></p>
+            <p>Password: <span className="font-mono">admin123</span></p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
