@@ -84,7 +84,7 @@ export default function AgentDashboard() {
                     'bg-sage-200'
                   }`} />
                   <div>
-                    <p className="text-sm font-medium capitalize">{report.waste_type} — {report.severity}</p>
+                    <p className="text-sm font-medium capitalize">{report.waste_type} - {report.severity}</p>
                     <p className="text-xs text-gray-400">{report.address || `${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}`}</p>
                   </div>
                 </div>

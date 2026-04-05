@@ -17,7 +17,7 @@ export default function HotspotsPage() {
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-          <p>Map visualization — integrate <code>react-leaflet</code> with hotspot markers</p>
+          <p>Map visualization - integrate <code>react-leaflet</code> with hotspot markers</p>
         </div>
       </div>
 
@@ -40,10 +40,15 @@ export default function HotspotsPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-16 bg-gray-200 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full"
+                        className={`h-2 rounded-full ${
+                          h.risk_score > 0.7
+                            ? 'bg-moss-600'
+                            : h.risk_score > 0.4
+                              ? 'bg-primary-600'
+                              : 'bg-sage-400'
+                        }`}
                         style={{
                           width: `${h.risk_score * 100}%`,
-                          backgroundColor: h.risk_score > 0.7 ? '#ef4444' : h.risk_score > 0.4 ? '#f59e0b' : '#22c55e',
                         }}
                       ></div>
                     </div>
