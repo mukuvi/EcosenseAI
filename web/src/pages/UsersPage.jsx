@@ -57,6 +57,24 @@ export default function UsersPage() {
     }
   };
 
+  const handleToggleActive = async (userId, nextActive) => {
+    try {
+      const { data } = await api.patch(`/users/${userId}/active`, { is_active: nextActive });
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: data.user.is_active } : u)));
+    } catch (err) {
+      console.error('Failed to update user status', err);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    try {
+      const { data } = await api.delete(`/users/${userId}`);
+      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: data.user.is_active } : u)));
+    } catch (err) {
+      console.error('Failed to delete user', err);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Users</h2>
@@ -177,6 +195,24 @@ export default function UsersPage() {
                 <td className="px-6 py-4 text-sm">
                   <span className={`inline-block w-2 h-2 rounded-full mr-1 ${user.is_active ? 'bg-moss-600' : 'bg-sage-300'}`}></span>
                   {user.is_active ? 'Active' : 'Inactive'}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(user.id, !user.is_active)}
+                      className="px-3 py-1 rounded-lg border text-ink hover:bg-surface transition"
+                    >
+                      {user.is_active ? 'Block' : 'Unblock'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(user.id)}
+                      className="px-3 py-1 rounded-lg border border-sage-300 text-ink hover:bg-sage-50 transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

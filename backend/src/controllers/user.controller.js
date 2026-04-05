@@ -114,3 +114,50 @@ exports.updateRole = async (req, res, next) => {
     next(err);
   }
 };
+
+/**
+ * PATCH /api/users/:id/active (admin)
+ */
+exports.updateActive = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { is_active } = req.body;
+    const { rows } = await db.query(
+      'UPDATE users SET is_active = $1, updated_at = NOW() WHERE id = $2 RETURNING id, email, full_name, role, is_active',
+      [!!is_active, req.params.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
+ * DELETE /api/users/:id (admin)
+ * Deactivates the account instead of hard deleting, to avoid cascading data loss.
+ */
+exports.deleteUser = async (req, res, next) => {
+  try {
+    const { rows } = await db.query(
+      'UPDATE users SET is_active = false, updated_at = NOW() WHERE id = $1 RETURNING id, email, full_name, role, is_active',
+      [req.params.id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ user: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};

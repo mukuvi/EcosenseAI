@@ -30,4 +30,15 @@ router.post(
 // Admin: update user role
 router.patch('/:id/role', authorize('admin'), userController.updateRole);
 
+// Admin: block/unblock a user
+router.patch(
+	'/:id/active',
+	authorize('admin'),
+	[body('is_active').isBoolean()],
+	userController.updateActive
+);
+
+// Admin: delete (deactivate) a user
+router.delete('/:id', authorize('admin'), userController.deleteUser);
+
 module.exports = router;

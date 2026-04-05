@@ -14,8 +14,8 @@ const useAuthStore = create((set, get) => ({
     return data;
   },
 
-  register: async (email, password, full_name, phone) => {
-    const { data } = await api.post('/auth/register', { email, password, full_name, phone });
+  register: async (email, password, full_name, phone, role) => {
+    const { data } = await api.post('/auth/register', { email, password, full_name, phone, role });
     localStorage.setItem('ecosense_token', data.token);
     localStorage.setItem('ecosense_user', JSON.stringify(data.user));
     set({ user: data.user, token: data.token });

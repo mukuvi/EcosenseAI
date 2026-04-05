@@ -24,14 +24,14 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    if (selectedRole !== 'citizen') {
-      setError('Organization, Field Agent, and Admin accounts are created by an administrator. If you already have an account, sign in.');
+    if (selectedRole === 'admin') {
+      setError('Admin accounts are created by an administrator. Choose a different portal or sign in if you already have access.');
       return;
     }
 
     setLoading(true);
     try {
-      const data = await register(email, password, fullName, phone || undefined);
+      const data = await register(email, password, fullName, phone || undefined, selectedRole);
       const role = data.user.role;
       if (role === 'admin') navigate('/');
       else if (role === 'field_agent') navigate('/agent');
@@ -70,11 +70,9 @@ export default function RegisterPage() {
           ))}
         </div>
 
-        {selectedRole !== 'citizen' && (
+        {selectedRole === 'admin' && (
           <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">
-            {selectedRole === 'organization' && 'Organization accounts are created by an administrator.'}
-            {selectedRole === 'field_agent' && 'Field Agent accounts are created by an administrator.'}
-            {selectedRole === 'admin' && 'Admin accounts are created by an administrator.'}
+            Admin accounts are created by an administrator.
             <span className="block mt-1">If you already have an account, sign in instead.</span>
           </div>
         )}
