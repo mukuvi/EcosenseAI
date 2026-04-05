@@ -1,6 +1,8 @@
 """
 Hotspot Prediction Router
 Predicts areas with high likelihood of waste accumulation based on historical report data.
+
+Implementation: DBSCAN clustering on report locations, with severity-weighted risk scoring.
 """
 
 from fastapi import APIRouter

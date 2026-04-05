@@ -22,6 +22,8 @@ uvicorn app.main:app --reload --port 8000
 
 The classifier route will load a real model file from `ai/models/` if present, otherwise it uses a deterministic heuristic fallback.
 
+Note: `ai/models/` may not exist on a fresh clone. It will be created automatically when you train/export a model.
+
 Supported files:
 
 - `ai/models/waste_classifier.h5` or `ai/models/waste_classifier.keras` (TensorFlow / Keras)

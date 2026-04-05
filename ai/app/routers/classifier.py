@@ -1,6 +1,9 @@
 """
 Waste Image Classifier Router
-Uses a CNN model to classify waste types from uploaded images.
+Classifies waste types from uploaded images.
+
+Loads a TensorFlow / scikit-learn model from `ai/models/` when available,
+otherwise falls back to a deterministic heuristic.
 """
 
 from functools import lru_cache
