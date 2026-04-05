@@ -55,7 +55,7 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-surface text-ink">
-      <aside className="w-64 bg-primary-900 text-white flex flex-col">
+      <aside className="w-64 bg-primary-800 text-white flex flex-col">
         <div className="p-6">
           <h1 className="text-xl font-bold">EcoSense AI</h1>
           <p className="text-primary-200 text-sm mt-1">{roleLabels[role] || 'Dashboard'}</p>
@@ -80,7 +80,7 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-primary-800">
+        <div className="p-4 border-t border-primary-700">
           <p className="text-sm text-primary-200 truncate">{user?.full_name}</p>
           <p className="text-xs text-primary-300 truncate">{user?.email}</p>
           <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-primary-600 rounded-full capitalize">

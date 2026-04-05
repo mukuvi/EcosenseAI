@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import useAuthStore from './store/authStore';
 import Layout from './components/Layout';
@@ -24,7 +25,14 @@ function ProtectedRoute({ children }) {
 }
 
 function RoleRoute({ children, roles }) {
+  const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
+  const hydrating = useAuthStore((s) => s.hydrating);
+
+  if (token && (!user || hydrating)) {
+    return <div className="min-h-screen bg-surface text-ink flex items-center justify-center">Loading...</div>;
+  }
+
   if (!roles.includes(user?.role)) {
     if (user?.role === 'admin') return <Navigate to="/" replace />;
     if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
@@ -35,7 +43,14 @@ function RoleRoute({ children, roles }) {
 }
 
 function LoginRedirect() {
+  const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
+  const hydrating = useAuthStore((s) => s.hydrating);
+
+  if (token && (!user || hydrating)) {
+    return <div className="min-h-screen bg-surface text-ink flex items-center justify-center">Loading...</div>;
+  }
+
   if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
   if (user?.role === 'organization') return <Navigate to="/org" replace />;
   if (user?.role === 'citizen') return <Navigate to="/citizen" replace />;
@@ -43,6 +58,12 @@ function LoginRedirect() {
 }
 
 export default function App() {
+  const hydrate = useAuthStore((s) => s.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

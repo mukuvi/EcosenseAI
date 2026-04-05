@@ -15,7 +15,13 @@ exports.register = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, password, full_name, phone } = req.body;
+    const { email, password, full_name, phone, role } = req.body;
+
+    const requestedRole = role || 'citizen';
+    const publicRoles = ['citizen', 'organization', 'field_agent'];
+    if (!publicRoles.includes(requestedRole)) {
+      return res.status(403).json({ error: 'Role cannot be self-registered' });
+    }
 
     // Check for existing user
     const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
@@ -26,10 +32,10 @@ exports.register = async (req, res, next) => {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const { rows } = await db.query(
-      `INSERT INTO users (email, password_hash, full_name, phone)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO users (email, password_hash, full_name, phone, role)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, full_name, role, points_balance, created_at`,
-      [email, passwordHash, full_name, phone || null]
+      [email, passwordHash, full_name, phone || null, requestedRole]
     );
 
     const user = rows[0];

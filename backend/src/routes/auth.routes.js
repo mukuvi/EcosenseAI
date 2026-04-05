@@ -11,6 +11,7 @@ router.post(
     body('password').isLength({ min: 6 }),
     body('full_name').trim().notEmpty(),
     body('phone').optional().isMobilePhone(),
+    body('role').optional().isIn(['citizen', 'organization', 'field_agent', 'admin']),
   ],
   authController.register
 );
