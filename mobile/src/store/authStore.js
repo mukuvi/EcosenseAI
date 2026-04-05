@@ -14,9 +14,7 @@ const useAuthStore = create((set, get) => ({
       set({ token, user: userJson ? JSON.parse(userJson) : null });
       try {
         await get().refreshProfile();
-      } catch {
-        // ignore; invalid token will be handled by API interceptor (401)
-      }
+      } catch {}
     }
 
     set({ isLoading: false });

@@ -28,7 +28,6 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Greeting */}
       <View style={styles.header}>
         <Text style={styles.greeting}>Habari, {user?.full_name?.split(' ')[0]}! 👋</Text>
         <View style={styles.pointsBadge}>

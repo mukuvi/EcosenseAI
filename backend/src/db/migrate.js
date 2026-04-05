@@ -1,18 +1,9 @@
-/**
- * EcoSense AI — Database Migration
- * Creates all required tables for the platform.
- */
 const { pool } = require('./index');
 const logger = require('../utils/logger');
 
 const migration = `
--- Enable PostGIS extension for geospatial data (install if available)
--- CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- ============================================================
--- USERS
--- ============================================================
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email VARCHAR(255) UNIQUE NOT NULL,
@@ -27,7 +18,6 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Ensure role constraint includes organization (handles existing DBs)
 DO $$
 DECLARE
   c RECORD;
@@ -36,10 +26,8 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Drop the known constraint name if present
   EXECUTE 'ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check';
 
-  -- Drop any other users-table CHECK constraints that reference the role column
   FOR c IN
     SELECT conname
     FROM pg_constraint
@@ -50,15 +38,11 @@ BEGIN
     EXECUTE format('ALTER TABLE users DROP CONSTRAINT IF EXISTS %I', c.conname);
   END LOOP;
 
-  -- Recreate the correct role constraint
   ALTER TABLE users
     ADD CONSTRAINT users_role_check
     CHECK (role IN ('citizen', 'admin', 'field_agent', 'organization'));
 END $$;
 
--- ============================================================
--- WASTE REPORTS
--- ============================================================
 CREATE TABLE IF NOT EXISTS waste_reports (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   reporter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -82,9 +66,6 @@ CREATE TABLE IF NOT EXISTS waste_reports (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- REPORT ASSIGNMENTS (for field agents / government teams)
--- ============================================================
 CREATE TABLE IF NOT EXISTS report_assignments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   report_id UUID NOT NULL REFERENCES waste_reports(id) ON DELETE CASCADE,
@@ -97,9 +78,6 @@ CREATE TABLE IF NOT EXISTS report_assignments (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- REWARDS
--- ============================================================
 CREATE TABLE IF NOT EXISTS rewards (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title VARCHAR(255) NOT NULL,
@@ -113,9 +91,6 @@ CREATE TABLE IF NOT EXISTS rewards (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- REWARD REDEMPTIONS
--- ============================================================
 CREATE TABLE IF NOT EXISTS reward_redemptions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -126,9 +101,6 @@ CREATE TABLE IF NOT EXISTS reward_redemptions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- POINT TRANSACTIONS (audit trail)
--- ============================================================
 CREATE TABLE IF NOT EXISTS point_transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -140,9 +112,6 @@ CREATE TABLE IF NOT EXISTS point_transactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- HOTSPOTS (AI-predicted waste accumulation areas)
--- ============================================================
 CREATE TABLE IF NOT EXISTS hotspots (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   latitude DOUBLE PRECISION NOT NULL,
@@ -155,9 +124,6 @@ CREATE TABLE IF NOT EXISTS hotspots (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- INDEXES
--- ============================================================
 CREATE INDEX IF NOT EXISTS idx_waste_reports_reporter ON waste_reports(reporter_id);
 CREATE INDEX IF NOT EXISTS idx_waste_reports_status ON waste_reports(status);
 CREATE INDEX IF NOT EXISTS idx_waste_reports_location ON waste_reports(latitude, longitude);

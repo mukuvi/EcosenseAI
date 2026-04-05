@@ -1,10 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const db = require('../db');
-
-/**
- * Authentication middleware — verifies JWT from Authorization header.
- */
 function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -38,11 +34,6 @@ function authenticate(req, res, next) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
-
-/**
- * Authorization middleware — restricts access to specific roles.
- * @param  {...string} roles - Allowed roles
- */
 function authorize(...roles) {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

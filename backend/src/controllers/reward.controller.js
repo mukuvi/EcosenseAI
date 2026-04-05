@@ -1,10 +1,6 @@
 const { validationResult } = require('express-validator');
 const db = require('../db');
 const logger = require('../utils/logger');
-
-/**
- * GET /api/rewards
- */
 exports.list = async (_req, res, next) => {
   try {
     const { rows } = await db.query(
@@ -15,16 +11,11 @@ exports.list = async (_req, res, next) => {
     next(err);
   }
 };
-
-/**
- * POST /api/rewards/:id/redeem
- */
 exports.redeem = async (req, res, next) => {
   const client = await db.getClient();
   try {
     await client.query('BEGIN');
 
-    // Get the reward
     const { rows: rewardRows } = await client.query(
       'SELECT * FROM rewards WHERE id = $1 AND is_active = true FOR UPDATE',
       [req.params.id]
@@ -37,7 +28,6 @@ exports.redeem = async (req, res, next) => {
 
     const reward = rewardRows[0];
 
-    // Check user balance
     const { rows: userRows } = await client.query(
       'SELECT points_balance FROM users WHERE id = $1 FOR UPDATE',
       [req.user.id]
@@ -54,19 +44,16 @@ exports.redeem = async (req, res, next) => {
       return res.status(400).json({ error: 'Reward out of stock' });
     }
 
-    // Deduct points
     await client.query(
       'UPDATE users SET points_balance = points_balance - $1 WHERE id = $2',
       [reward.points_cost, req.user.id]
     );
 
-    // Decrement reward quantity
     await client.query(
       'UPDATE rewards SET quantity_available = quantity_available - 1 WHERE id = $1',
       [reward.id]
     );
 
-    // Create redemption record
     const { rows: redemptionRows } = await client.query(
       `INSERT INTO reward_redemptions (user_id, reward_id, points_spent, status)
        VALUES ($1, $2, $3, 'pending')
@@ -74,7 +61,6 @@ exports.redeem = async (req, res, next) => {
       [req.user.id, reward.id, reward.points_cost]
     );
 
-    // Log point transaction
     await client.query(
       `INSERT INTO point_transactions (user_id, amount, type, reference_type, reference_id, description)
        VALUES ($1, $2, 'redeemed', 'reward', $3, $4)`,
@@ -92,10 +78,6 @@ exports.redeem = async (req, res, next) => {
     client.release();
   }
 };
-
-/**
- * POST /api/rewards (admin)
- */
 exports.create = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -117,10 +99,6 @@ exports.create = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * PUT /api/rewards/:id (admin)
- */
 exports.update = async (req, res, next) => {
   try {
     const { title, description, points_cost, category, image_url, quantity_available, is_active } = req.body;

@@ -6,7 +6,6 @@ import { colors } from '../theme/colors';
 
 const { width, height } = Dimensions.get('window');
 
-// Default to Nairobi
 const NAIROBI = { latitude: -1.2921, longitude: 36.8219, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
 const SEVERITY_COLORS = { low: colors.primary500, medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };

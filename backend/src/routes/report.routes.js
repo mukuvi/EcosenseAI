@@ -6,10 +6,8 @@ const upload = require('../middleware/upload');
 
 const router = express.Router();
 
-// All report routes require authentication
 router.use(authenticate);
 
-// Get current user's reports
 router.get(
   '/mine',
   [
@@ -22,7 +20,6 @@ router.get(
   reportController.listMine
 );
 
-// Create a new waste report
 router.post(
   '/',
   upload.array('images', 5),
@@ -39,7 +36,6 @@ router.post(
   reportController.create
 );
 
-// List reports with filtering
 router.get(
   '/',
   [
@@ -53,10 +49,8 @@ router.get(
   reportController.list
 );
 
-// Get single report
 router.get('/:id', reportController.getById);
 
-// Update report status (admin / field_agent)
 router.patch(
   '/:id/status',
   [body('status').isIn(['verified', 'assigned', 'in_progress', 'resolved', 'rejected'])],

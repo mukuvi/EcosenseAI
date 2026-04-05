@@ -7,13 +7,10 @@ const router = express.Router();
 
 router.use(authenticate);
 
-// Get user's point balance & transaction history
 router.get('/points', userController.getPoints);
 
-// Admin: list all users
 router.get('/', authorize('admin'), userController.listUsers);
 
-// Admin: create a user account
 router.post(
 	'/',
 	authorize('admin'),
@@ -27,10 +24,8 @@ router.post(
 	userController.createUser
 );
 
-// Admin: update user role
 router.patch('/:id/role', authorize('admin'), userController.updateRole);
 
-// Admin: block/unblock a user
 router.patch(
 	'/:id/active',
 	authorize('admin'),
@@ -38,7 +33,6 @@ router.patch(
 	userController.updateActive
 );
 
-// Admin: delete (deactivate) a user
 router.delete('/:id', authorize('admin'), userController.deleteUser);
 
 module.exports = router;

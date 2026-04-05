@@ -6,7 +6,6 @@ function getDevHostFromScriptURL() {
   const scriptURL = NativeModules?.SourceCode?.scriptURL;
   if (!scriptURL || typeof scriptURL !== 'string') return null;
 
-  // Example: http://192.168.0.10:8081/index.bundle?platform=ios
   const match = scriptURL.match(/^https?:\/\/([^:/?#]+)(?::\d+)?\//i);
   return match?.[1] || null;
 }

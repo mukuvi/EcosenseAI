@@ -10,8 +10,6 @@ import numpy as np
 import io
 
 router = APIRouter()
-
-# Waste type labels matching the database schema
 WASTE_LABELS = [
     "plastic", "organic", "electronic", "hazardous",
     "construction", "medical", "textile", "mixed", "other"
@@ -45,11 +43,6 @@ async def classify_waste(image: UploadFile = File(...)):
         image_bytes = await image.read()
         processed = preprocess_image(image_bytes)
 
-        # TODO: Load actual trained model
-        # model = tf.keras.models.load_model("models/waste_classifier.h5")
-        # predictions = model.predict(processed)[0]
-
-        # Placeholder: random predictions for development
         predictions = np.random.dirichlet(np.ones(len(WASTE_LABELS)))
 
         predicted_idx = int(np.argmax(predictions))

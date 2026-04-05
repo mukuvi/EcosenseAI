@@ -3,10 +3,6 @@ const { validationResult } = require('express-validator');
 const db = require('../db');
 
 const ALLOWED_ROLES = ['citizen', 'admin', 'field_agent', 'organization'];
-
-/**
- * GET /api/users/points
- */
 exports.getPoints = async (req, res, next) => {
   try {
     const { rows: userRows } = await db.query(
@@ -27,10 +23,6 @@ exports.getPoints = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * GET /api/users (admin)
- */
 exports.listUsers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20 } = req.query;
@@ -54,10 +46,6 @@ exports.listUsers = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * POST /api/users (admin)
- */
 exports.createUser = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -89,10 +77,6 @@ exports.createUser = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * PATCH /api/users/:id/role (admin)
- */
 exports.updateRole = async (req, res, next) => {
   try {
     const { role } = req.body;
@@ -114,10 +98,6 @@ exports.updateRole = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * PATCH /api/users/:id/active (admin)
- */
 exports.updateActive = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -140,11 +120,6 @@ exports.updateActive = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * DELETE /api/users/:id (admin)
- * Deactivates the account instead of hard deleting, to avoid cascading data loss.
- */
 exports.deleteUser = async (req, res, next) => {
   try {
     const { rows } = await db.query(

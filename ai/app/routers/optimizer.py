@@ -15,13 +15,13 @@ class Location(BaseModel):
     id: str
     latitude: float
     longitude: float
-    priority: float = 1.0  # Higher = more urgent
+    priority: float = 1.0
 
 
 class RouteRequest(BaseModel):
-    depot: Location  # Starting/ending point (e.g., waste facility)
-    locations: list[Location]  # Waste collection points
-    max_stops: int | None = None  # Optional limit on stops per route
+    depot: Location
+    locations: list[Location]
+    max_stops: int | None = None
 
 
 class RouteStop(BaseModel):
@@ -53,14 +53,12 @@ async def optimize_route(request: RouteRequest):
     """
     locations = list(request.locations)
     if request.max_stops and len(locations) > request.max_stops:
-        # Keep highest priority locations
         locations.sort(key=lambda l: l.priority, reverse=True)
         locations = locations[: request.max_stops]
 
     if not locations:
         return RouteResponse(route=[], total_distance_km=0, total_stops=0)
 
-    # Nearest-neighbor with priority weighting
     visited: list[RouteStop] = []
     remaining = list(locations)
     current_lat = request.depot.latitude
@@ -68,7 +66,6 @@ async def optimize_route(request: RouteRequest):
     total_distance = 0.0
 
     while remaining:
-        # Score = distance / priority (lower = better)
         scores = []
         for loc in remaining:
             dist = haversine_km(current_lat, current_lon, loc.latitude, loc.longitude)
@@ -89,7 +86,6 @@ async def optimize_route(request: RouteRequest):
         current_lat = best.latitude
         current_lon = best.longitude
 
-    # Return to depot
     return_distance = haversine_km(current_lat, current_lon, request.depot.latitude, request.depot.longitude)
     total_distance += return_distance
 

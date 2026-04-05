@@ -7,16 +7,13 @@ const router = express.Router();
 
 router.use(authenticate);
 
-// List available rewards
 router.get('/', rewardController.list);
 
-// Redeem a reward
 router.post(
   '/:id/redeem',
   rewardController.redeem
 );
 
-// Admin: create a reward
 router.post(
   '/',
   authorize('admin'),
@@ -28,7 +25,6 @@ router.post(
   rewardController.create
 );
 
-// Admin: update a reward
 router.put(
   '/:id',
   authorize('admin'),

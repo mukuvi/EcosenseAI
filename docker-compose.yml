@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
   db:
     image: postgres:16-alpine
     environment:
@@ -18,7 +17,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Node.js Backend API
   backend:
     build:
       context: ./backend
@@ -42,7 +40,6 @@ services:
       - ./backend/src:/app/src
       - uploads:/app/uploads
 
-  # Python AI Service
   ai:
     build:
       context: ./ai
@@ -53,7 +50,6 @@ services:
       - ./ai/app:/app/app
       - ./ai/models:/app/models
 
-  # React Web Dashboard
   web:
     build:
       context: ./web

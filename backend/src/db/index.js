@@ -16,19 +16,7 @@ const pool = new Pool({
 pool.on('error', (err) => {
   logger.error('Unexpected database pool error', err);
 });
-
-/**
- * Execute a query against the database.
- * @param {string} text - SQL query string
- * @param {Array} params - Query parameters
- * @returns {Promise<import('pg').QueryResult>}
- */
 const query = (text, params) => pool.query(text, params);
-
-/**
- * Get a client from the pool for transactions.
- * @returns {Promise<import('pg').PoolClient>}
- */
 const getClient = () => pool.connect();
 
 module.exports = { pool, query, getClient };

@@ -2,10 +2,6 @@ const { validationResult } = require('express-validator');
 const db = require('../db');
 const config = require('../config');
 const logger = require('../utils/logger');
-
-/**
- * POST /api/reports
- */
 exports.create = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -20,7 +16,6 @@ exports.create = async (req, res, next) => {
     try {
       await client.query('BEGIN');
 
-      // Create the report
       const { rows } = await client.query(
         `INSERT INTO waste_reports
           (reporter_id, latitude, longitude, address, description, waste_type, severity, image_urls, points_awarded)
@@ -41,13 +36,11 @@ exports.create = async (req, res, next) => {
 
       const report = rows[0];
 
-      // Award points to the reporter
       await client.query(
         'UPDATE users SET points_balance = points_balance + $1 WHERE id = $2',
         [config.points.perReport, req.user.id]
       );
 
-      // Log point transaction
       await client.query(
         `INSERT INTO point_transactions (user_id, amount, type, reference_type, reference_id, description)
          VALUES ($1, $2, 'earned', 'waste_report', $3, 'Points earned for waste report')`,
@@ -68,11 +61,6 @@ exports.create = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * GET /api/reports/mine
- * Returns only reports created by the authenticated user.
- */
 exports.listMine = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
@@ -115,10 +103,6 @@ exports.listMine = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * GET /api/reports
- */
 exports.list = async (req, res, next) => {
   try {
     const { status, waste_type, page = 1, limit = 20 } = req.query;
@@ -168,10 +152,6 @@ exports.list = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * GET /api/reports/:id
- */
 exports.getById = async (req, res, next) => {
   try {
     const { rows } = await db.query(
@@ -191,10 +171,6 @@ exports.getById = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * PATCH /api/reports/:id/status
- */
 exports.updateStatus = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -202,7 +178,6 @@ exports.updateStatus = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Only admin, field_agent, or organization can update status
     if (!['admin', 'field_agent', 'organization'].includes(req.user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
@@ -220,7 +195,6 @@ exports.updateStatus = async (req, res, next) => {
 
     const report = rows[0];
 
-    // Award bonus points if report is verified
     if (status === 'verified') {
       const bonusPoints = config.points.perVerifiedReport - config.points.perReport;
       if (bonusPoints > 0) {

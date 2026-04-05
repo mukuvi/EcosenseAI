@@ -76,7 +76,6 @@ export default function ReportScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Camera */}
       <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
         <Text style={styles.cameraText}>📸 Take Photo</Text>
       </TouchableOpacity>
@@ -89,14 +88,12 @@ export default function ReportScreen() {
         </ScrollView>
       )}
 
-      {/* Location */}
       <TouchableOpacity style={styles.locationButton} onPress={getLocation}>
         <Text style={styles.locationText}>
           {location ? `📍 ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : '📍 Set Location'}
         </Text>
       </TouchableOpacity>
 
-      {/* Waste type picker */}
       <Text style={styles.label}>Waste Type</Text>
       <View style={styles.chipRow}>
         {WASTE_TYPES.map((type) => (
@@ -110,7 +107,6 @@ export default function ReportScreen() {
         ))}
       </View>
 
-      {/* Severity */}
       <Text style={styles.label}>Severity</Text>
       <View style={styles.chipRow}>
         {SEVERITY_LEVELS.map((level) => (
@@ -124,7 +120,6 @@ export default function ReportScreen() {
         ))}
       </View>
 
-      {/* Description */}
       <Text style={styles.label}>Description (optional)</Text>
       <TextInput
         style={styles.textArea}
@@ -135,7 +130,6 @@ export default function ReportScreen() {
         onChangeText={setDescription}
       />
 
-      {/* Submit */}
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
         <Text style={styles.submitText}>{loading ? 'Submitting...' : 'Submit Report'}</Text>
       </TouchableOpacity>

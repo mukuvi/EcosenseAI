@@ -4,10 +4,6 @@ const { validationResult } = require('express-validator');
 const db = require('../db');
 const config = require('../config');
 const logger = require('../utils/logger');
-
-/**
- * POST /api/auth/register
- */
 exports.register = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -23,7 +19,6 @@ exports.register = async (req, res, next) => {
       return res.status(403).json({ error: 'Role cannot be self-registered' });
     }
 
-    // Check for existing user
     const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: 'Email already registered' });
@@ -51,10 +46,6 @@ exports.register = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * POST /api/auth/login
- */
 exports.login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -92,14 +83,8 @@ exports.login = async (req, res, next) => {
     next(err);
   }
 };
-
-/**
- * GET /api/auth/me
- */
 exports.getProfile = async (req, res, next) => {
   try {
-    const { authenticate } = require('../middleware/auth');
-    // This route also uses authenticate inline
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Authentication required' });

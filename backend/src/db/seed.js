@@ -1,7 +1,3 @@
-/**
- * EcoSense AI — Database Seeder
- * Inserts sample data for development and testing.
- */
 const bcrypt = require('bcryptjs');
 const { pool } = require('./index');
 const logger = require('../utils/logger');
@@ -11,7 +7,6 @@ async function seed() {
   try {
     await client.query('BEGIN');
 
-    // Main default admin (requested)
     const mainAdminHash = await bcrypt.hash('admin@gmail.com', 12);
     await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance, is_active)
@@ -23,7 +18,6 @@ async function seed() {
       ['admin@gmail.com', mainAdminHash, 'Main Admin', '+254700000001', 'admin', 0]
     );
 
-    // Admin user
     const adminHash = await bcrypt.hash('admin123', 12);
     await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance)
@@ -32,7 +26,6 @@ async function seed() {
       ['admin@ecosense.co.ke', adminHash, 'EcoSense Admin', '+254700000000', 'admin', 0]
     );
 
-    // Sample citizen
     const citizenHash = await bcrypt.hash('citizen123', 12);
     const { rows: [citizen] } = await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance)
@@ -42,7 +35,6 @@ async function seed() {
       ['jane@example.com', citizenHash, 'Jane Wanjiku', '+254711111111', 'citizen', 50]
     );
 
-    // Sample field agent
     const agentHash = await bcrypt.hash('agent123', 12);
     await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance)
@@ -51,7 +43,6 @@ async function seed() {
       ['agent@ecosense.co.ke', agentHash, 'David Oduor', '+254722222222', 'field_agent', 0]
     );
 
-    // Sample organization user
     const orgHash = await bcrypt.hash('org123', 12);
     await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance)
@@ -60,7 +51,6 @@ async function seed() {
       ['org@ecosense.co.ke', orgHash, 'EcoSense Partner Org', '+254733333333', 'organization', 0]
     );
 
-    // Sample waste reports (Nairobi locations)
     if (citizen) {
       await client.query(
         `INSERT INTO waste_reports (reporter_id, latitude, longitude, address, description, waste_type, severity, status, points_awarded)
@@ -72,7 +62,6 @@ async function seed() {
       );
     }
 
-    // Sample rewards
     await client.query(
       `INSERT INTO rewards (title, description, points_cost, category, quantity_available, is_active)
        VALUES
