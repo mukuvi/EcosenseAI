@@ -4,7 +4,7 @@ Python-based microservice for waste image classification, hotspot prediction, an
 
 ## Components
 
-- **Image Classifier**: CNN-based waste type classification (TensorFlow/PyTorch)
+- **Image Classifier**: Waste type classification (TensorFlow / scikit-learn, with a lightweight heuristic fallback)
 - **Hotspot Predictor**: ML model predicting waste accumulation areas
 - **Route Optimizer**: Optimizes waste collection vehicle routes
 
