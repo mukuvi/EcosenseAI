@@ -4,15 +4,15 @@ import api from '../services/api';
 import StatCard from '../components/StatCard';
 
 const WASTE_COLORS = {
-  plastic: '#3b82f6',
-  organic: '#22c55e',
-  electronic: '#a855f7',
-  hazardous: '#ef4444',
-  construction: '#f59e0b',
-  medical: '#ec4899',
-  textile: '#14b8a6',
-  mixed: '#6b7280',
-  other: '#94a3b8',
+  plastic: '#2563eb',
+  organic: '#0d9488',
+  electronic: '#7c3aed',
+  hazardous: '#dc2626',
+  construction: '#d97706',
+  medical: '#db2777',
+  textile: '#0891b2',
+  mixed: '#475569',
+  other: '#64748b',
 };
 
 export default function DashboardPage() {
@@ -42,14 +42,12 @@ export default function DashboardPage() {
     fetchData();
   }, []);
 
-  // Aggregate waste types for pie chart
   const wasteTypeCounts = reports.reduce((acc, r) => {
     acc[r.waste_type] = (acc[r.waste_type] || 0) + 1;
     return acc;
   }, {});
   const pieData = Object.entries(wasteTypeCounts).map(([name, value]) => ({ name, value }));
 
-  // Aggregate by severity for bar chart
   const severityCounts = reports.reduce((acc, r) => {
     acc[r.severity] = (acc[r.severity] || 0) + 1;
     return acc;
@@ -60,17 +58,14 @@ export default function DashboardPage() {
     <div>
       <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Reports" value={stats.total} icon="📋" />
-        <StatCard title="Pending" value={stats.pending} icon="⏳" color="bg-yellow-500" />
-        <StatCard title="Resolved" value={stats.resolved} icon="✅" color="bg-green-500" />
-        <StatCard title="Users" value={stats.users} icon="👥" color="bg-blue-500" />
+        <StatCard title="Total Reports" value={stats.total} />
+        <StatCard title="Pending" value={stats.pending} color="bg-yellow-500" />
+        <StatCard title="Resolved" value={stats.resolved} color="bg-green-600" />
+        <StatCard title="Users" value={stats.users} color="bg-sky-600" />
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Waste type distribution */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="font-semibold mb-4">Waste Type Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -85,7 +80,6 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Severity breakdown */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h3 className="font-semibold mb-4">Reports by Severity</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -94,7 +88,7 @@ export default function DashboardPage() {
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#16a34a" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#0d9488" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

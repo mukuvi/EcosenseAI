@@ -29,24 +29,21 @@ export default function CitizenDashboard() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-2">Welcome back, {user?.full_name?.split(' ')[0]}! 👋</h2>
+      <h2 className="text-2xl font-bold mb-2">Welcome back, {user?.full_name?.split(' ')[0]}</h2>
       <p className="text-gray-500 mb-6">Here's an overview of your contributions to a cleaner environment.</p>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="My Reports" value={stats.totalReports} icon="📋" />
-        <StatCard title="Pending" value={stats.pendingReports} icon="⏳" color="bg-yellow-500" />
-        <StatCard title="Resolved" value={stats.resolvedReports} icon="✅" color="bg-green-500" />
-        <StatCard title="My Points" value={user?.points_balance || 0} icon="⭐" color="bg-blue-500" />
+        <StatCard title="My Reports" value={stats.totalReports} />
+        <StatCard title="Pending" value={stats.pendingReports} color="bg-yellow-500" />
+        <StatCard title="Resolved" value={stats.resolvedReports} color="bg-green-600" />
+        <StatCard title="My Points" value={user?.points_balance || 0} color="bg-sky-600" />
       </div>
 
-      {/* Quick actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Link
           to="/citizen/report/new"
           className="bg-primary-600 text-white rounded-xl p-6 hover:bg-primary-700 transition flex items-center gap-4"
         >
-          <span className="text-3xl">📸</span>
           <div>
             <h3 className="font-semibold text-lg">Report Waste</h3>
             <p className="text-primary-100 text-sm">Submit a new waste report and earn points</p>
@@ -56,7 +53,6 @@ export default function CitizenDashboard() {
           to="/citizen/rewards"
           className="bg-white border-2 border-primary-200 rounded-xl p-6 hover:border-primary-400 transition flex items-center gap-4"
         >
-          <span className="text-3xl">🎁</span>
           <div>
             <h3 className="font-semibold text-lg text-gray-900">Redeem Rewards</h3>
             <p className="text-gray-500 text-sm">Use your {user?.points_balance || 0} points to claim rewards</p>
@@ -64,7 +60,6 @@ export default function CitizenDashboard() {
         </Link>
       </div>
 
-      {/* Recent reports */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Recent Reports</h3>
@@ -81,9 +76,7 @@ export default function CitizenDashboard() {
                 className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">
-                    {report.waste_type === 'plastic' ? '♻️' : report.waste_type === 'electronic' ? '🔌' : report.waste_type === 'hazardous' ? '☣️' : '🗑️'}
-                  </span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
                   <div>
                     <p className="text-sm font-medium capitalize">{report.waste_type} waste</p>
                     <p className="text-xs text-gray-400">{report.address || `${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}`}</p>

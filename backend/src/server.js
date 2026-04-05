@@ -48,7 +48,7 @@ app.use(errorHandler);
 
 // --------------- Start Server ---------------
 app.listen(config.port, () => {
-  logger.info(`🌍 EcoSense AI API running on port ${config.port} (${config.nodeEnv})`);
+  logger.info(`EcoSense AI API running on port ${config.port} (${config.nodeEnv})`);
 });
 
 module.exports = app;

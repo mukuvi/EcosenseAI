@@ -34,19 +34,17 @@ export default function AgentDashboard() {
       <p className="text-gray-500 mb-6">Welcome, {user?.full_name}. Here's your field operations overview.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard title="Total Reports" value={stats.total} icon="📋" />
-        <StatCard title="Assigned" value={stats.assigned} icon="📌" color="bg-purple-500" />
-        <StatCard title="In Progress" value={stats.inProgress} icon="🔧" color="bg-orange-500" />
-        <StatCard title="Resolved" value={stats.resolved} icon="✅" color="bg-green-500" />
+        <StatCard title="Total Reports" value={stats.total} />
+        <StatCard title="Assigned" value={stats.assigned} color="bg-violet-600" />
+        <StatCard title="In Progress" value={stats.inProgress} color="bg-amber-600" />
+        <StatCard title="Resolved" value={stats.resolved} color="bg-green-600" />
       </div>
 
-      {/* Quick actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Link
           to="/agent/reports"
           className="bg-primary-600 text-white rounded-xl p-6 hover:bg-primary-700 transition flex items-center gap-4"
         >
-          <span className="text-3xl">📋</span>
           <div>
             <h3 className="font-semibold text-lg">View Reports</h3>
             <p className="text-primary-100 text-sm">Review and update waste report statuses</p>
@@ -56,7 +54,6 @@ export default function AgentDashboard() {
           to="/agent/hotspots"
           className="bg-white border-2 border-primary-200 rounded-xl p-6 hover:border-primary-400 transition flex items-center gap-4"
         >
-          <span className="text-3xl">🔥</span>
           <div>
             <h3 className="font-semibold text-lg text-gray-900">Hotspot Map</h3>
             <p className="text-gray-500 text-sm">View AI-predicted waste accumulation areas</p>
@@ -64,7 +61,6 @@ export default function AgentDashboard() {
         </Link>
       </div>
 
-      {/* Recent assigned reports */}
       <div className="bg-white rounded-xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-lg">Recent Reports</h3>

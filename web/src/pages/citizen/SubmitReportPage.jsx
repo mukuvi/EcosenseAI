@@ -3,15 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
 const WASTE_TYPES = [
-  { value: 'plastic', label: 'Plastic', icon: '♻️' },
-  { value: 'organic', label: 'Organic', icon: '🍂' },
-  { value: 'electronic', label: 'Electronic', icon: '🔌' },
-  { value: 'hazardous', label: 'Hazardous', icon: '☣️' },
-  { value: 'construction', label: 'Construction', icon: '🧱' },
-  { value: 'medical', label: 'Medical', icon: '🏥' },
-  { value: 'textile', label: 'Textile', icon: '👕' },
-  { value: 'mixed', label: 'Mixed', icon: '🗑️' },
-  { value: 'other', label: 'Other', icon: '📦' },
+  { value: 'plastic', label: 'Plastic' },
+  { value: 'organic', label: 'Organic' },
+  { value: 'electronic', label: 'Electronic' },
+  { value: 'hazardous', label: 'Hazardous' },
+  { value: 'construction', label: 'Construction' },
+  { value: 'medical', label: 'Medical' },
+  { value: 'textile', label: 'Textile' },
+  { value: 'mixed', label: 'Mixed' },
+  { value: 'other', label: 'Other' },
 ];
 
 const SEVERITY_LEVELS = [
@@ -100,7 +100,6 @@ export default function SubmitReportPage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        {/* Location */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
           <button
@@ -109,7 +108,7 @@ export default function SubmitReportPage() {
             disabled={locating}
             className="mb-3 px-4 py-2 bg-primary-50 text-primary-700 rounded-lg text-sm hover:bg-primary-100 transition disabled:opacity-50"
           >
-            {locating ? '📍 Getting location...' : '📍 Use my current location'}
+            {locating ? 'Getting location...' : 'Use my current location'}
           </button>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -144,7 +143,6 @@ export default function SubmitReportPage() {
           />
         </div>
 
-        {/* Waste type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Waste Type</label>
           <div className="grid grid-cols-3 gap-2">
@@ -159,14 +157,12 @@ export default function SubmitReportPage() {
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <span>{type.icon}</span>
                 <span>{type.label}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Severity */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
           <div className="flex gap-2">
@@ -187,7 +183,6 @@ export default function SubmitReportPage() {
           </div>
         </div>
 
-        {/* Description */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
           <textarea
@@ -199,7 +194,6 @@ export default function SubmitReportPage() {
           />
         </div>
 
-        {/* Images */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Photos (up to 5)</label>
           <input
@@ -214,7 +208,6 @@ export default function SubmitReportPage() {
           )}
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading}

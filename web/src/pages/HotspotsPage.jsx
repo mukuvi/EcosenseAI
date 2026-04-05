@@ -15,14 +15,12 @@ export default function HotspotsPage() {
         AI-predicted areas with high likelihood of waste accumulation, based on historical report data.
       </p>
 
-      {/* Map placeholder — integrate Leaflet here */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
         <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
           <p>Map visualization — integrate <code>react-leaflet</code> with hotspot markers</p>
         </div>
       </div>
 
-      {/* Hotspot table */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-sm text-gray-500">

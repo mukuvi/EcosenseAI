@@ -17,11 +17,9 @@ export default function CitizenRewardsPage() {
     setMessage('');
     try {
       await api.post(`/rewards/${rewardId}/redeem`);
-      setMessage('Reward redeemed successfully! 🎉');
-      // Refresh user data to update points
+      setMessage('Reward redeemed successfully.');
       const { data } = await api.get('/auth/me');
       useAuthStore.setState({ user: data.user });
-      // Refresh rewards
       const rewardsRes = await api.get('/rewards');
       setRewards(rewardsRes.data.rewards);
     } catch (err) {
@@ -40,7 +38,7 @@ export default function CitizenRewardsPage() {
         </div>
         <div className="bg-primary-50 rounded-lg px-4 py-2">
           <p className="text-xs text-primary-600">Your balance</p>
-          <p className="text-xl font-bold text-primary-700">⭐ {user?.points_balance || 0} pts</p>
+          <p className="text-xl font-bold text-primary-700">{user?.points_balance || 0} pts</p>
         </div>
       </div>
 

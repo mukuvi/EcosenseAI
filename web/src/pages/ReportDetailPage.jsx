@@ -32,7 +32,6 @@ export default function ReportDetailPage() {
       <h2 className="text-2xl font-bold mb-6">Report Details</h2>
 
       <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-500">Report ID</p>
@@ -41,7 +40,6 @@ export default function ReportDetailPage() {
           <StatusBadge status={report.status} />
         </div>
 
-        {/* Details grid */}
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Location</p>
@@ -69,7 +67,6 @@ export default function ReportDetailPage() {
           </div>
         </div>
 
-        {/* Description */}
         {report.description && (
           <div>
             <p className="text-gray-500 text-sm mb-1">Description</p>
@@ -77,7 +74,6 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        {/* Images */}
         {report.image_urls?.length > 0 && (
           <div>
             <p className="text-gray-500 text-sm mb-2">Images</p>
@@ -94,7 +90,6 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        {/* Status actions */}
         <div>
           <p className="text-gray-500 text-sm mb-2">Update Status</p>
           <div className="flex gap-2 flex-wrap">

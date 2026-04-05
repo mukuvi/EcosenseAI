@@ -9,14 +9,10 @@ import ReportDetailPage from './pages/ReportDetailPage';
 import UsersPage from './pages/UsersPage';
 import RewardsPage from './pages/RewardsPage';
 import HotspotsPage from './pages/HotspotsPage';
-
-// Citizen pages
 import CitizenDashboard from './pages/citizen/CitizenDashboard';
 import MyReportsPage from './pages/citizen/MyReportsPage';
 import SubmitReportPage from './pages/citizen/SubmitReportPage';
 import CitizenRewardsPage from './pages/citizen/CitizenRewardsPage';
-
-// Agent pages
 import AgentDashboard from './pages/agent/AgentDashboard';
 import AgentReportsPage from './pages/agent/AgentReportsPage';
 
@@ -29,7 +25,6 @@ function ProtectedRoute({ children }) {
 function RoleRoute({ children, roles }) {
   const user = useAuthStore((s) => s.user);
   if (!roles.includes(user?.role)) {
-    // Redirect to the appropriate dashboard for their role
     if (user?.role === 'admin') return <Navigate to="/" replace />;
     if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
     return <Navigate to="/citizen" replace />;
@@ -50,7 +45,6 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Admin routes */}
       <Route
         path="/"
         element={
@@ -69,7 +63,6 @@ export default function App() {
         <Route path="hotspots" element={<HotspotsPage />} />
       </Route>
 
-      {/* Citizen routes */}
       <Route
         path="/citizen"
         element={
@@ -87,7 +80,6 @@ export default function App() {
         <Route path="rewards" element={<CitizenRewardsPage />} />
       </Route>
 
-      {/* Field agent routes */}
       <Route
         path="/agent"
         element={
@@ -104,7 +96,6 @@ export default function App() {
         <Route path="hotspots" element={<HotspotsPage />} />
       </Route>
 
-      {/* Catch-all: redirect based on role */}
       <Route path="*" element={
         <ProtectedRoute>
           <LoginRedirect />
