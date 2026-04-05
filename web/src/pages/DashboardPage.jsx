@@ -4,13 +4,13 @@ import api from '../services/api';
 import StatCard from '../components/StatCard';
 
 const WASTE_COLORS = {
-  plastic: '#2563eb',
-  organic: '#0d9488',
-  electronic: '#7c3aed',
-  hazardous: '#dc2626',
-  construction: '#d97706',
-  medical: '#db2777',
-  textile: '#0891b2',
+  plastic: '#2F5D50',
+  organic: '#6B8E23',
+  electronic: '#9CAF88',
+  hazardous: '#264B41',
+  construction: '#3f4b35',
+  medical: '#556548',
+  textile: '#6c7f5c',
   mixed: '#475569',
   other: '#64748b',
 };
@@ -60,9 +60,9 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="Total Reports" value={stats.total} />
-        <StatCard title="Pending" value={stats.pending} color="bg-yellow-500" />
-        <StatCard title="Resolved" value={stats.resolved} color="bg-green-600" />
-        <StatCard title="Users" value={stats.users} color="bg-sky-600" />
+        <StatCard title="Pending" value={stats.pending} color="bg-sage-400" />
+        <StatCard title="Resolved" value={stats.resolved} color="bg-moss-600" />
+        <StatCard title="Users" value={stats.users} color="bg-primary-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -88,7 +88,7 @@ export default function DashboardPage() {
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#0d9488" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#2F5D50" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

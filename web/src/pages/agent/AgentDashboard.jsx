@@ -35,9 +35,9 @@ export default function AgentDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="Total Reports" value={stats.total} />
-        <StatCard title="Assigned" value={stats.assigned} color="bg-violet-600" />
-        <StatCard title="In Progress" value={stats.inProgress} color="bg-amber-600" />
-        <StatCard title="Resolved" value={stats.resolved} color="bg-green-600" />
+        <StatCard title="Assigned" value={stats.assigned} color="bg-sage-400" />
+        <StatCard title="In Progress" value={stats.inProgress} color="bg-primary-500" />
+        <StatCard title="Resolved" value={stats.resolved} color="bg-moss-600" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -78,10 +78,10 @@ export default function AgentDashboard() {
               >
                 <div className="flex items-center gap-3">
                   <span className={`w-2 h-2 rounded-full ${
-                    report.status === 'assigned' ? 'bg-purple-500' :
-                    report.status === 'in_progress' ? 'bg-orange-500' :
-                    report.status === 'resolved' ? 'bg-green-500' :
-                    'bg-gray-300'
+                    report.status === 'assigned' ? 'bg-sage-400' :
+                    report.status === 'in_progress' ? 'bg-primary-500' :
+                    report.status === 'resolved' ? 'bg-moss-600' :
+                    'bg-sage-200'
                   }`} />
                   <div>
                     <p className="text-sm font-medium capitalize">{report.waste_type} — {report.severity}</p>

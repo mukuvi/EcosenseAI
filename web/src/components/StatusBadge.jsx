@@ -1,10 +1,10 @@
 const statusColors = {
-  pending: 'bg-yellow-100 text-yellow-800',
-  verified: 'bg-blue-100 text-blue-800',
-  assigned: 'bg-purple-100 text-purple-800',
-  in_progress: 'bg-orange-100 text-orange-800',
-  resolved: 'bg-green-100 text-green-800',
-  rejected: 'bg-red-100 text-red-800',
+  pending: 'bg-sage-50 text-ink border border-sage-200',
+  verified: 'bg-primary-50 text-primary-800 border border-primary-200',
+  assigned: 'bg-sage-100 text-ink border border-sage-200',
+  in_progress: 'bg-primary-100 text-primary-900 border border-primary-200',
+  resolved: 'bg-moss-50 text-ink border border-moss-200',
+  rejected: 'bg-stone-100 text-ink border border-stone-200',
 };
 
 export default function StatusBadge({ status }) {

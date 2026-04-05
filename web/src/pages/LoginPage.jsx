@@ -28,15 +28,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="bg-white rounded-2xl shadow-sm p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
+          <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">

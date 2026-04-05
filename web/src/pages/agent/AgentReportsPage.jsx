@@ -85,7 +85,7 @@ export default function AgentReportsPage() {
                     {report.status === 'verified' && (
                       <button
                         onClick={() => handleStatusChange(report.id, 'assigned')}
-                        className="text-xs px-2 py-1 bg-purple-50 text-purple-700 rounded hover:bg-purple-100"
+                        className="text-xs px-2 py-1 bg-sage-50 text-ink border border-sage-200 rounded hover:bg-sage-100"
                       >
                         Assign
                       </button>
@@ -93,7 +93,7 @@ export default function AgentReportsPage() {
                     {report.status === 'assigned' && (
                       <button
                         onClick={() => handleStatusChange(report.id, 'in_progress')}
-                        className="text-xs px-2 py-1 bg-orange-50 text-orange-700 rounded hover:bg-orange-100"
+                        className="text-xs px-2 py-1 bg-primary-50 text-primary-800 border border-primary-200 rounded hover:bg-primary-100"
                       >
                         Start
                       </button>
@@ -101,7 +101,7 @@ export default function AgentReportsPage() {
                     {report.status === 'in_progress' && (
                       <button
                         onClick={() => handleStatusChange(report.id, 'resolved')}
-                        className="text-xs px-2 py-1 bg-green-50 text-green-700 rounded hover:bg-green-100"
+                        className="text-xs px-2 py-1 bg-moss-50 text-ink border border-moss-200 rounded hover:bg-moss-100"
                       >
                         Resolve
                       </button>

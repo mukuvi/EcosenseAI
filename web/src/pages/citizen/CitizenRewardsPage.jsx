@@ -44,7 +44,9 @@ export default function CitizenRewardsPage() {
 
       {message && (
         <div className={`px-4 py-3 rounded-lg mb-4 text-sm ${
-          message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          message.toLowerCase().includes('success')
+            ? 'bg-moss-50 text-ink border border-moss-200'
+            : 'bg-sage-50 text-ink border border-sage-200'
         }`}>
           {message}
         </div>

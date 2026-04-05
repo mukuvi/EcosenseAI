@@ -34,9 +34,9 @@ export default function CitizenDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard title="My Reports" value={stats.totalReports} />
-        <StatCard title="Pending" value={stats.pendingReports} color="bg-yellow-500" />
-        <StatCard title="Resolved" value={stats.resolvedReports} color="bg-green-600" />
-        <StatCard title="My Points" value={user?.points_balance || 0} color="bg-sky-600" />
+        <StatCard title="Pending" value={stats.pendingReports} color="bg-sage-400" />
+        <StatCard title="Resolved" value={stats.resolvedReports} color="bg-moss-600" />
+        <StatCard title="My Points" value={user?.points_balance || 0} color="bg-primary-500" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -84,9 +84,9 @@ export default function CitizenDashboard() {
                 </div>
                 <div className="text-right">
                   <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                    report.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                    report.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-blue-100 text-blue-800'
+                    report.status === 'resolved' ? 'bg-moss-50 text-ink border border-moss-200' :
+                    report.status === 'pending' ? 'bg-sage-50 text-ink border border-sage-200' :
+                    'bg-primary-50 text-primary-800 border border-primary-200'
                   }`}>
                     {report.status?.replace('_', ' ')}
                   </span>

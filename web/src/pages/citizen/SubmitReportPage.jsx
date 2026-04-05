@@ -15,10 +15,10 @@ const WASTE_TYPES = [
 ];
 
 const SEVERITY_LEVELS = [
-  { value: 'low', label: 'Low', color: 'bg-green-100 text-green-800 border-green-300' },
-  { value: 'medium', label: 'Medium', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
-  { value: 'high', label: 'High', color: 'bg-orange-100 text-orange-800 border-orange-300' },
-  { value: 'critical', label: 'Critical', color: 'bg-red-100 text-red-800 border-red-300' },
+  { value: 'low', label: 'Low', color: 'bg-sage-50 text-ink border-sage-200' },
+  { value: 'medium', label: 'Medium', color: 'bg-sage-100 text-ink border-sage-200' },
+  { value: 'high', label: 'High', color: 'bg-primary-50 text-primary-800 border-primary-200' },
+  { value: 'critical', label: 'Critical', color: 'bg-stone-100 text-ink border-stone-200' },
 ];
 
 export default function SubmitReportPage() {
@@ -96,7 +96,7 @@ export default function SubmitReportPage() {
       <p className="text-gray-500 mb-6">Help keep your community clean by reporting waste. You'll earn points for each valid report!</p>
 
       {error && (
-        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
+        <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6">

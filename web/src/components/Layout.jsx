@@ -46,7 +46,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-surface text-ink">
       <aside className="w-64 bg-primary-900 text-white flex flex-col">
         <div className="p-6">
           <h1 className="text-xl font-bold">EcoSense AI</h1>
@@ -87,7 +87,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8 bg-slate-50">
+      <main className="flex-1 overflow-y-auto p-8 bg-surface">
         <Outlet />
       </main>
     </div>
