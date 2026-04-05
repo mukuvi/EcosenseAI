@@ -18,6 +18,13 @@ import AgentDashboard from './pages/agent/AgentDashboard';
 import AgentReportsPage from './pages/agent/AgentReportsPage';
 import OrganizationDashboard from './pages/org/OrganizationDashboard';
 
+const roleLanding = {
+  admin: '/admin',
+  field_agent: '/agent',
+  organization: '/org',
+  citizen: '/citizen',
+};
+
 function ProtectedRoute({ children }) {
   const token = useAuthStore((s) => s.token);
   if (!token) return <Navigate to="/login" replace />;
@@ -34,10 +41,7 @@ function RoleRoute({ children, roles }) {
   }
 
   if (!roles.includes(user?.role)) {
-    if (user?.role === 'admin') return <Navigate to="/" replace />;
-    if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
-    if (user?.role === 'organization') return <Navigate to="/org" replace />;
-    return <Navigate to="/citizen" replace />;
+    return <Navigate to={roleLanding[user?.role] || '/citizen'} replace />;
   }
   return children;
 }
@@ -51,10 +55,8 @@ function LoginRedirect() {
     return <div className="min-h-screen bg-surface text-ink flex items-center justify-center">Loading...</div>;
   }
 
-  if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
-  if (user?.role === 'organization') return <Navigate to="/org" replace />;
-  if (user?.role === 'citizen') return <Navigate to="/citizen" replace />;
-  return <Navigate to="/login" replace />;
+  if (!token) return <Navigate to="/login" replace />;
+  return <Navigate to={roleLanding[user?.role] || '/citizen'} replace />;
 }
 
 export default function App() {
@@ -71,6 +73,15 @@ export default function App() {
 
       <Route
         path="/"
+        element={
+          <ProtectedRoute>
+            <LoginRedirect />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
         element={
           <ProtectedRoute>
             <RoleRoute roles={['admin']}>
@@ -136,11 +147,7 @@ export default function App() {
         <Route path="hotspots" element={<HotspotsPage />} />
       </Route>
 
-      <Route path="*" element={
-        <ProtectedRoute>
-          <LoginRedirect />
-        </ProtectedRoute>
-      } />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

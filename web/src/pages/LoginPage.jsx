@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 
 const roleLanding = {
-  admin: '/',
+  admin: '/admin',
   field_agent: '/agent',
   organization: '/org',
   citizen: '/citizen',
