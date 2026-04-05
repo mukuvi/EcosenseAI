@@ -39,6 +39,15 @@ async function seed() {
       ['agent@ecosense.co.ke', agentHash, 'David Oduor', '+254722222222', 'field_agent', 0]
     );
 
+    // Sample organization user
+    const orgHash = await bcrypt.hash('org123', 12);
+    await client.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (email) DO NOTHING`,
+      ['org@ecosense.co.ke', orgHash, 'EcoSense Partner Org', '+254733333333', 'organization', 0]
+    );
+
     // Sample waste reports (Nairobi locations)
     if (citizen) {
       await client.query(

@@ -20,12 +20,39 @@ CREATE TABLE IF NOT EXISTS users (
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20),
   avatar_url TEXT,
-  role VARCHAR(20) NOT NULL DEFAULT 'citizen' CHECK (role IN ('citizen', 'admin', 'field_agent')),
+  role VARCHAR(20) NOT NULL DEFAULT 'citizen' CHECK (role IN ('citizen', 'admin', 'field_agent', 'organization')),
   points_balance INT NOT NULL DEFAULT 0,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Ensure role constraint includes organization (handles existing DBs)
+DO $$
+DECLARE
+  role_constraint_name TEXT;
+BEGIN
+  SELECT con.conname
+    INTO role_constraint_name
+  FROM pg_constraint con
+  JOIN pg_class rel ON rel.oid = con.conrelid
+  WHERE rel.relname = 'users'
+    AND con.contype = 'c'
+    AND pg_get_constraintdef(con.oid) LIKE '%role%'
+    AND pg_get_constraintdef(con.oid) LIKE '%IN%';
+
+  IF role_constraint_name IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE users DROP CONSTRAINT %I', role_constraint_name);
+  END IF;
+
+  BEGIN
+    ALTER TABLE users
+      ADD CONSTRAINT users_role_check
+      CHECK (role IN ('citizen', 'admin', 'field_agent', 'organization'));
+  EXCEPTION WHEN duplicate_object THEN
+    NULL;
+  END;
+END $$;
 
 -- ============================================================
 -- WASTE REPORTS

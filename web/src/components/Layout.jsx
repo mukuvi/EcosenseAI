@@ -22,15 +22,23 @@ const agentNav = [
   { to: '/agent/hotspots', label: 'Hotspots' },
 ];
 
+const organizationNav = [
+  { to: '/org', label: 'Dashboard' },
+  { to: '/org/reports', label: 'Reports' },
+  { to: '/org/hotspots', label: 'Hotspots' },
+];
+
 const roleLabels = {
   admin: 'Admin Dashboard',
   citizen: 'Citizen Portal',
   field_agent: 'Field Agent Portal',
+  organization: 'Organization Portal',
 };
 
 function getNavItems(role) {
   if (role === 'admin') return adminNav;
   if (role === 'field_agent') return agentNav;
+  if (role === 'organization') return organizationNav;
   return citizenNav;
 }
 

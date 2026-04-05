@@ -15,6 +15,7 @@ import SubmitReportPage from './pages/citizen/SubmitReportPage';
 import CitizenRewardsPage from './pages/citizen/CitizenRewardsPage';
 import AgentDashboard from './pages/agent/AgentDashboard';
 import AgentReportsPage from './pages/agent/AgentReportsPage';
+import OrganizationDashboard from './pages/org/OrganizationDashboard';
 
 function ProtectedRoute({ children }) {
   const token = useAuthStore((s) => s.token);
@@ -27,6 +28,7 @@ function RoleRoute({ children, roles }) {
   if (!roles.includes(user?.role)) {
     if (user?.role === 'admin') return <Navigate to="/" replace />;
     if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
+    if (user?.role === 'organization') return <Navigate to="/org" replace />;
     return <Navigate to="/citizen" replace />;
   }
   return children;
@@ -35,6 +37,7 @@ function RoleRoute({ children, roles }) {
 function LoginRedirect() {
   const user = useAuthStore((s) => s.user);
   if (user?.role === 'field_agent') return <Navigate to="/agent" replace />;
+  if (user?.role === 'organization') return <Navigate to="/org" replace />;
   if (user?.role === 'citizen') return <Navigate to="/citizen" replace />;
   return <Navigate to="/login" replace />;
 }
@@ -92,6 +95,22 @@ export default function App() {
       >
         <Route index element={<AgentDashboard />} />
         <Route path="reports" element={<AgentReportsPage />} />
+        <Route path="reports/:id" element={<ReportDetailPage />} />
+        <Route path="hotspots" element={<HotspotsPage />} />
+      </Route>
+
+      <Route
+        path="/org"
+        element={
+          <ProtectedRoute>
+            <RoleRoute roles={['organization']}>
+              <Layout />
+            </RoleRoute>
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<OrganizationDashboard />} />
+        <Route path="reports" element={<ReportsPage />} />
         <Route path="reports/:id" element={<ReportDetailPage />} />
         <Route path="hotspots" element={<HotspotsPage />} />
       </Route>

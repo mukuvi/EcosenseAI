@@ -19,6 +19,7 @@ export default function LoginPage() {
       const role = data.user.role;
       if (role === 'admin') navigate('/');
       else if (role === 'field_agent') navigate('/agent');
+      else if (role === 'organization') navigate('/org');
       else navigate('/citizen');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');

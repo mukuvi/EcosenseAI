@@ -1,4 +1,8 @@
+const bcrypt = require('bcryptjs');
+const { validationResult } = require('express-validator');
 const db = require('../db');
+
+const ALLOWED_ROLES = ['citizen', 'admin', 'field_agent', 'organization'];
 
 /**
  * GET /api/users/points
@@ -52,12 +56,47 @@ exports.listUsers = async (req, res, next) => {
 };
 
 /**
+ * POST /api/users (admin)
+ */
+exports.createUser = async (req, res, next) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password, full_name, phone, role } = req.body;
+
+    if (!ALLOWED_ROLES.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: 'Email already registered' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const { rows } = await db.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, role)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, email, full_name, phone, role, points_balance, is_active, created_at`,
+      [email, passwordHash, full_name, phone || null, role]
+    );
+
+    res.status(201).json({ user: rows[0] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/**
  * PATCH /api/users/:id/role (admin)
  */
 exports.updateRole = async (req, res, next) => {
   try {
     const { role } = req.body;
-    if (!['citizen', 'admin', 'field_agent'].includes(role)) {
+    if (!ALLOWED_ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
