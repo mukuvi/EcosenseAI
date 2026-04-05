@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import useAuthStore from '../store/authStore';
+import { colors } from '../theme/colors';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -20,9 +21,9 @@ function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#16a34a',
+        tabBarActiveTintColor: colors.primary600,
         tabBarInactiveTintColor: '#9ca3af',
-        headerStyle: { backgroundColor: '#16a34a' },
+        headerStyle: { backgroundColor: colors.primary600 },
         headerTintColor: '#fff',
       }}
     >

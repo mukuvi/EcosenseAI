@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import useAuthStore from '../store/authStore';
+import { colors } from '../theme/colors';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
@@ -45,19 +46,19 @@ export default function RegisterScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf4' },
+  container: { flex: 1, backgroundColor: colors.background },
   inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 48 },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: '#15803d' },
-  subtitle: { fontSize: 14, textAlign: 'center', color: '#6b7280', marginBottom: 32 },
+  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary600 },
+  subtitle: { fontSize: 14, textAlign: 'center', color: colors.textMuted, marginBottom: 32 },
   input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#d1d5db',
+    backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border,
     borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, marginBottom: 12,
   },
   button: {
-    backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 16,
+    backgroundColor: colors.primary600, borderRadius: 12, paddingVertical: 16,
     alignItems: 'center', marginTop: 8, marginBottom: 16,
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { textAlign: 'center', color: '#6b7280', fontSize: 14 },
-  linkBold: { color: '#16a34a', fontWeight: '600' },
+  link: { textAlign: 'center', color: colors.textMuted, fontSize: 14 },
+  linkBold: { color: colors.primary600, fontWeight: '600' },
 });
