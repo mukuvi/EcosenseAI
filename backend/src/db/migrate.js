@@ -30,28 +30,30 @@ CREATE TABLE IF NOT EXISTS users (
 -- Ensure role constraint includes organization (handles existing DBs)
 DO $$
 DECLARE
-  role_constraint_name TEXT;
+  c RECORD;
 BEGIN
-  SELECT con.conname
-    INTO role_constraint_name
-  FROM pg_constraint con
-  JOIN pg_class rel ON rel.oid = con.conrelid
-  WHERE rel.relname = 'users'
-    AND con.contype = 'c'
-    AND pg_get_constraintdef(con.oid) LIKE '%role%'
-    AND pg_get_constraintdef(con.oid) LIKE '%IN%';
-
-  IF role_constraint_name IS NOT NULL THEN
-    EXECUTE format('ALTER TABLE users DROP CONSTRAINT %I', role_constraint_name);
+  IF to_regclass('public.users') IS NULL THEN
+    RETURN;
   END IF;
 
-  BEGIN
-    ALTER TABLE users
-      ADD CONSTRAINT users_role_check
-      CHECK (role IN ('citizen', 'admin', 'field_agent', 'organization'));
-  EXCEPTION WHEN duplicate_object THEN
-    NULL;
-  END;
+  -- Drop the known constraint name if present
+  EXECUTE 'ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check';
+
+  -- Drop any other users-table CHECK constraints that reference the role column
+  FOR c IN
+    SELECT conname
+    FROM pg_constraint
+    WHERE conrelid = 'public.users'::regclass
+      AND contype = 'c'
+      AND pg_get_constraintdef(oid) ILIKE '%role%'
+  LOOP
+    EXECUTE format('ALTER TABLE users DROP CONSTRAINT IF EXISTS %I', c.conname);
+  END LOOP;
+
+  -- Recreate the correct role constraint
+  ALTER TABLE users
+    ADD CONSTRAINT users_role_check
+    CHECK (role IN ('citizen', 'admin', 'field_agent', 'organization'));
 END $$;
 
 -- ============================================================
