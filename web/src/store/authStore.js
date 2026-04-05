@@ -33,8 +33,7 @@ const useAuthStore = create((set, get) => ({
 
   hydrate: async () => {
     const token = get().token;
-    const user = get().user;
-    if (!token || user) return;
+    if (!token) return;
 
     set({ hydrating: true });
     try {
