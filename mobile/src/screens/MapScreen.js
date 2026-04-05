@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import api from '../services/api';
+import { colors } from '../theme/colors';
 
 const { width, height } = Dimensions.get('window');
 
 // Default to Nairobi
 const NAIROBI = { latitude: -1.2921, longitude: 36.8219, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
-const SEVERITY_COLORS = { low: '#22c55e', medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
+const SEVERITY_COLORS = { low: colors.primary500, medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
 
 export default function MapScreen() {
   const [reports, setReports] = useState([]);
@@ -48,5 +49,5 @@ const styles = StyleSheet.create({
   callout: { width: 160, padding: 4 },
   calloutTitle: { fontWeight: '600', textTransform: 'capitalize', marginBottom: 2 },
   calloutText: { fontSize: 12, color: '#6b7280' },
-  calloutStatus: { fontSize: 11, color: '#16a34a', fontWeight: '600', marginTop: 4, textTransform: 'capitalize' },
+  calloutStatus: { fontSize: 11, color: colors.primary600, fontWeight: '600', marginTop: 4, textTransform: 'capitalize' },
 });

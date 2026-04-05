@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import useAuthStore from '../store/authStore';
 import api from '../services/api';
+import { colors } from '../theme/colors';
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
@@ -40,7 +41,7 @@ export default function HomeScreen() {
       <FlatList
         data={reports}
         keyExtractor={(item) => item.id}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#16a34a']} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary600]} />}
         renderItem={({ item }) => (
           <View style={styles.reportCard}>
             <View style={styles.reportHeader}>
@@ -58,23 +59,23 @@ export default function HomeScreen() {
 }
 
 function statusStyle(status) {
-  const colors = {
-    pending: '#f59e0b',
-    verified: '#3b82f6',
-    resolved: '#22c55e',
-    rejected: '#ef4444',
+  const statusColors = {
+    pending: colors.warning,
+    verified: colors.info,
+    resolved: colors.primary500,
+    rejected: colors.danger,
   };
-  return { color: colors[status] || '#6b7280' };
+  return { color: statusColors[status] || '#6b7280' };
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: colors.background },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    padding: 20, backgroundColor: '#16a34a',
+    padding: 20, backgroundColor: colors.primary600,
   },
   greeting: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  pointsBadge: { backgroundColor: '#15803d', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
+  pointsBadge: { backgroundColor: colors.primary500, borderRadius: 20, paddingHorizontal: 12, paddingVertical: 6 },
   pointsText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginHorizontal: 20, marginTop: 20, marginBottom: 12 },
   reportCard: {

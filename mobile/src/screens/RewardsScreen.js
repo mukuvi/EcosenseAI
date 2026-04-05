@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import api from '../services/api';
 import useAuthStore from '../store/authStore';
+import { colors } from '../theme/colors';
 
 export default function RewardsScreen() {
   const [rewards, setRewards] = useState([]);
@@ -62,12 +63,12 @@ export default function RewardsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: colors.background },
   balanceBar: {
-    backgroundColor: '#16a34a', padding: 20,
+    backgroundColor: colors.primary600, padding: 20,
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
   },
-  balanceLabel: { color: '#bbf7d0', fontSize: 14 },
+  balanceLabel: { color: colors.background, fontSize: 14 },
   balanceValue: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   list: { padding: 20 },
   card: {
@@ -79,11 +80,11 @@ const styles = StyleSheet.create({
   rewardTitle: { fontSize: 16, fontWeight: '600' },
   rewardDesc: { fontSize: 13, color: '#6b7280', marginTop: 2 },
   category: {
-    marginTop: 6, fontSize: 11, color: '#16a34a', backgroundColor: '#f0fdf4',
+    marginTop: 6, fontSize: 11, color: colors.primary600, backgroundColor: colors.background,
     paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10, alignSelf: 'flex-start',
   },
   redeemButton: {
-    backgroundColor: '#16a34a', borderRadius: 20,
+    backgroundColor: colors.primary600, borderRadius: 20,
     paddingHorizontal: 16, paddingVertical: 10, marginLeft: 12,
   },
   redeemText: { color: '#fff', fontWeight: '600', fontSize: 14 },

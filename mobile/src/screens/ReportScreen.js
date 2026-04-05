@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, Scro
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import api from '../services/api';
+import { colors } from '../theme/colors';
 
 const WASTE_TYPES = ['plastic', 'organic', 'electronic', 'hazardous', 'construction', 'medical', 'textile', 'mixed', 'other'];
 const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'];
@@ -143,13 +144,13 @@ export default function ReportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
+  container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
   cameraButton: {
-    backgroundColor: '#fff', borderWidth: 2, borderColor: '#16a34a', borderStyle: 'dashed',
+    backgroundColor: '#fff', borderWidth: 2, borderColor: colors.primary600, borderStyle: 'dashed',
     borderRadius: 12, paddingVertical: 32, alignItems: 'center', marginBottom: 16,
   },
-  cameraText: { fontSize: 18, color: '#16a34a', fontWeight: '600' },
+  cameraText: { fontSize: 18, color: colors.primary600, fontWeight: '600' },
   imageRow: { marginBottom: 16 },
   thumbnail: { width: 80, height: 80, borderRadius: 8, marginRight: 8 },
   locationButton: {
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
     backgroundColor: '#fff', borderWidth: 1, borderColor: '#d1d5db',
   },
-  chipActive: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
+  chipActive: { backgroundColor: colors.primary600, borderColor: colors.primary600 },
   chipText: { fontSize: 13, color: '#374151', textTransform: 'capitalize' },
   chipTextActive: { color: '#fff' },
   textArea: {
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, padding: 16, fontSize: 14, textAlignVertical: 'top', marginBottom: 20,
   },
   submitButton: {
-    backgroundColor: '#16a34a', borderRadius: 12, paddingVertical: 16, alignItems: 'center',
+    backgroundColor: colors.primary600, borderRadius: 12, paddingVertical: 16, alignItems: 'center',
   },
   submitText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

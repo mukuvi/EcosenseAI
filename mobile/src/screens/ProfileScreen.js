@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import useAuthStore from '../store/authStore';
+import { colors } from '../theme/colors';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
@@ -55,15 +56,15 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f9fafb' },
-  avatarContainer: { alignItems: 'center', paddingVertical: 32, backgroundColor: '#16a34a' },
+  container: { flex: 1, backgroundColor: colors.background },
+  avatarContainer: { alignItems: 'center', paddingVertical: 32, backgroundColor: colors.primary600 },
   avatar: {
-    width: 80, height: 80, borderRadius: 40, backgroundColor: '#15803d',
+    width: 80, height: 80, borderRadius: 40, backgroundColor: colors.primary500,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
   avatarText: { color: '#fff', fontSize: 32, fontWeight: 'bold' },
   name: { color: '#fff', fontSize: 20, fontWeight: '600' },
-  email: { color: '#bbf7d0', fontSize: 14, marginTop: 2 },
+  email: { color: colors.background, fontSize: 14, marginTop: 2 },
   statsRow: {
     flexDirection: 'row', backgroundColor: '#fff', marginTop: -1,
     paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f3f4f6',
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
   menuText: { fontSize: 16, color: '#374151' },
   logoutButton: {
     marginHorizontal: 20, marginTop: 32, paddingVertical: 16,
-    borderRadius: 12, borderWidth: 1, borderColor: '#ef4444', alignItems: 'center',
+    borderRadius: 12, borderWidth: 1, borderColor: colors.danger, alignItems: 'center',
   },
-  logoutText: { color: '#ef4444', fontSize: 16, fontWeight: '600' },
+  logoutText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
 });
