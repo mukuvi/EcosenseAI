@@ -202,8 +202,8 @@ exports.updateStatus = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    // Only admin or field_agent can update status
-    if (!['admin', 'field_agent'].includes(req.user.role)) {
+    // Only admin, field_agent, or organization can update status
+    if (!['admin', 'field_agent', 'organization'].includes(req.user.role)) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
 
