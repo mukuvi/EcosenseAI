@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import api from '../services/api';
 
-const useAuthStore = create((set) => ({
+const useAuthStore = create((set, get) => ({
   user: null,
   token: null,
   isLoading: true,
@@ -10,11 +10,16 @@ const useAuthStore = create((set) => ({
   init: async () => {
     const token = await SecureStore.getItemAsync('ecosense_token');
     const userJson = await SecureStore.getItemAsync('ecosense_user');
-    if (token && userJson) {
-      set({ token, user: JSON.parse(userJson), isLoading: false });
-    } else {
-      set({ isLoading: false });
+    if (token) {
+      set({ token, user: userJson ? JSON.parse(userJson) : null });
+      try {
+        await get().refreshProfile();
+      } catch {
+        // ignore; invalid token will be handled by API interceptor (401)
+      }
     }
+
+    set({ isLoading: false });
   },
 
   login: async (email, password) => {
@@ -25,12 +30,21 @@ const useAuthStore = create((set) => ({
     return data;
   },
 
-  register: async (email, password, full_name, phone) => {
-    const { data } = await api.post('/auth/register', { email, password, full_name, phone });
+  register: async (email, password, full_name, phone, role) => {
+    const { data } = await api.post('/auth/register', { email, password, full_name, phone, role });
     await SecureStore.setItemAsync('ecosense_token', data.token);
     await SecureStore.setItemAsync('ecosense_user', JSON.stringify(data.user));
     set({ user: data.user, token: data.token });
     return data;
+  },
+
+  refreshProfile: async () => {
+    const token = await SecureStore.getItemAsync('ecosense_token');
+    if (!token) return null;
+    const { data } = await api.get('/auth/me');
+    await SecureStore.setItemAsync('ecosense_user', JSON.stringify(data.user));
+    set({ user: data.user });
+    return data.user;
   },
 
   logout: async () => {

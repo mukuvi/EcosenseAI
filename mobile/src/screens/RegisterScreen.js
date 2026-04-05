@@ -5,6 +5,7 @@ import { colors } from '../theme/colors';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
+  const [role, setRole] = useState('citizen');
   const [loading, setLoading] = useState(false);
   const register = useAuthStore((s) => s.register);
 
@@ -14,7 +15,7 @@ export default function RegisterScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      await register(form.email, form.password, form.full_name, form.phone);
+      await register(form.email, form.password, form.full_name, form.phone, role);
     } catch (err) {
       Alert.alert('Registration Failed', err.response?.data?.error || 'Something went wrong');
     } finally {
@@ -27,6 +28,31 @@ export default function RegisterScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.inner}>
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join the EcoSense community</Text>
+
+        <Text style={styles.roleLabel}>Choose portal</Text>
+        <View style={styles.roleRow}>
+          <TouchableOpacity
+            style={[styles.roleChip, role === 'citizen' && styles.roleChipActive]}
+            onPress={() => setRole('citizen')}
+            disabled={loading}
+          >
+            <Text style={[styles.roleChipText, role === 'citizen' && styles.roleChipTextActive]}>Citizen</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.roleChip, role === 'organization' && styles.roleChipActive]}
+            onPress={() => setRole('organization')}
+            disabled={loading}
+          >
+            <Text style={[styles.roleChipText, role === 'organization' && styles.roleChipTextActive]}>Organization</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.roleChip, role === 'field_agent' && styles.roleChipActive]}
+            onPress={() => setRole('field_agent')}
+            disabled={loading}
+          >
+            <Text style={[styles.roleChipText, role === 'field_agent' && styles.roleChipTextActive]}>Field Agent</Text>
+          </TouchableOpacity>
+        </View>
 
         <TextInput style={styles.input} placeholder="Full Name *" value={form.full_name} onChangeText={(v) => setForm({ ...form, full_name: v })} />
         <TextInput style={styles.input} placeholder="Email *" keyboardType="email-address" autoCapitalize="none" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} />
@@ -50,6 +76,19 @@ const styles = StyleSheet.create({
   inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 48 },
   title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary600 },
   subtitle: { fontSize: 14, textAlign: 'center', color: colors.textMuted, marginBottom: 32 },
+  roleLabel: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 8 },
+  roleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
+  roleChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  roleChipActive: { backgroundColor: colors.primary600, borderColor: colors.primary600 },
+  roleChipText: { fontSize: 13, color: colors.text, fontWeight: '600' },
+  roleChipTextActive: { color: '#fff' },
   input: {
     backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border,
     borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, marginBottom: 12,

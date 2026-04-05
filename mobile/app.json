@@ -9,7 +9,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#16a34a"
+      "backgroundColor": "#3AA335"
     },
     "ios": {
       "supportsTablet": true,
@@ -22,7 +22,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#16a34a"
+        "backgroundColor": "#3AA335"
       },
       "package": "ke.co.ecosense.ai",
       "permissions": ["CAMERA", "ACCESS_FINE_LOCATION"]
