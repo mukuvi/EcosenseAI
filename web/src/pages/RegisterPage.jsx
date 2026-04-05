@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 
+const ROLE_OPTIONS = [
+  { value: 'citizen', label: 'Citizen' },
+  { value: 'organization', label: 'Organization' },
+  { value: 'field_agent', label: 'Field Agent' },
+  { value: 'admin', label: 'Admin' },
+];
+
 export default function RegisterPage() {
+  const [selectedRole, setSelectedRole] = useState('citizen');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -15,6 +23,12 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (selectedRole !== 'citizen') {
+      setError('Organization, Field Agent, and Admin accounts are created by an administrator. If you already have an account, sign in.');
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await register(email, password, fullName, phone || undefined);
@@ -35,8 +49,35 @@ export default function RegisterPage() {
       <div className="bg-white rounded-2xl shadow-sm p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
-          <p className="text-gray-500 mt-2">Create your account</p>
+          <p className="text-gray-500 mt-2">Choose your portal and create an account</p>
         </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-5">
+          {ROLE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setSelectedRole(opt.value)}
+              className={
+                `px-3 py-2 rounded-lg text-sm border transition ` +
+                (selectedRole === opt.value
+                  ? 'bg-primary-600 text-white border-primary-600'
+                  : 'bg-surface text-ink border-sage-200 hover:border-primary-300')
+              }
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        {selectedRole !== 'citizen' && (
+          <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">
+            {selectedRole === 'organization' && 'Organization accounts are created by an administrator.'}
+            {selectedRole === 'field_agent' && 'Field Agent accounts are created by an administrator.'}
+            {selectedRole === 'admin' && 'Admin accounts are created by an administrator.'}
+            <span className="block mt-1">If you already have an account, sign in instead.</span>
+          </div>
+        )}
 
         {error && (
           <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">{error}</div>
