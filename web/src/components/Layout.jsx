@@ -66,7 +66,7 @@ export default function Layout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/' || item.to === '/citizen' || item.to === '/agent'}
+              end={item.to === '/' || item.to === '/citizen' || item.to === '/agent' || item.to === '/org'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                   isActive

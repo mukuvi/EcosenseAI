@@ -69,7 +69,7 @@ export default function ReportsPage() {
                   {new Date(report.created_at).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4">
-                  <Link to={`/reports/${report.id}`} className="text-primary-600 hover:underline text-sm">
+                  <Link to={`${report.id}`} className="text-primary-600 hover:underline text-sm">
                     View
                   </Link>
                 </td>
