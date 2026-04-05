@@ -2,11 +2,11 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 
 const adminNav = [
-  { to: '/', label: 'Dashboard' },
-  { to: '/reports', label: 'Reports' },
-  { to: '/hotspots', label: 'Hotspots' },
-  { to: '/users', label: 'Users' },
-  { to: '/rewards', label: 'Rewards' },
+  { to: '/admin', label: 'Dashboard' },
+  { to: '/admin/reports', label: 'Reports' },
+  { to: '/admin/hotspots', label: 'Hotspots' },
+  { to: '/admin/users', label: 'Users' },
+  { to: '/admin/rewards', label: 'Rewards' },
 ];
 
 const citizenNav = [
@@ -66,7 +66,7 @@ export default function Layout() {
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/' || item.to === '/citizen' || item.to === '/agent' || item.to === '/org'}
+              end={item.to === '/admin' || item.to === '/citizen' || item.to === '/agent' || item.to === '/org'}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                   isActive

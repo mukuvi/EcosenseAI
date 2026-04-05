@@ -33,7 +33,7 @@ export default function RegisterPage() {
     try {
       const data = await register(email, password, fullName, phone || undefined, selectedRole);
       const role = data.user.role;
-      if (role === 'admin') navigate('/');
+      if (role === 'admin') navigate('/admin');
       else if (role === 'field_agent') navigate('/agent');
       else if (role === 'organization') navigate('/org');
       else navigate('/citizen');

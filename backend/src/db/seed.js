@@ -11,6 +11,18 @@ async function seed() {
   try {
     await client.query('BEGIN');
 
+    // Main default admin (requested)
+    const mainAdminHash = await bcrypt.hash('admin@gmail.com', 12);
+    await client.query(
+      `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, true)
+       ON CONFLICT (email) DO UPDATE SET
+         password_hash = EXCLUDED.password_hash,
+         role = 'admin',
+         is_active = true`,
+      ['admin@gmail.com', mainAdminHash, 'Main Admin', '+254700000001', 'admin', 0]
+    );
+
     // Admin user
     const adminHash = await bcrypt.hash('admin123', 12);
     await client.query(
