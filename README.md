@@ -84,6 +84,8 @@ uvicorn app.main:app --reload
 
 ## Deploy on Render
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mukuvi/EcosenseAI)
+
 `render.yaml` is a Render Blueprint for the three app services plus Postgres. Render does not run `docker-compose.yml`, so each service is declared separately.
 
 1. Push this repo, then in Render choose **New → Blueprint** and pick the repo.
@@ -94,6 +96,7 @@ uvicorn app.main:app --reload
 Notes:
 
 - `ecosense-api` stores report photos on a 1 GB persistent disk mounted at `/app/uploads`. Container filesystems are ephemeral, so without the disk every deploy would delete the photos.
+- The seeded `admin@gmail.com` account takes its password from `SEED_ADMIN_PASSWORD`, which the blueprint generates. Read it under the service's **Environment** tab to sign in, and change the demo accounts' passwords before sharing the URL publicly.
 - The free Postgres plan is deleted after 30 days. Move to a paid plan before then, or the data goes with it.
 - `ecosense-ai` ships without a trained model, so it serves the heuristic classifier in `ai/app/ml/waste_classifier.py`. Commit a model to `ai/models/` or set `WASTE_CLASSIFIER_MODEL_PATH` to use a real one; TensorFlow is only imported when a `.keras`/`.h5` file is found.
 - The dashboard is served by nginx (`web/Dockerfile.render`), which proxies `/api` and `/uploads` to the API service. One origin, no CORS setup, and relative API URLs keep working.

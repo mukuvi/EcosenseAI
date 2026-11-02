@@ -7,7 +7,14 @@ async function seed() {
   try {
     await client.query('BEGIN');
 
-    const mainAdminHash = await bcrypt.hash('admin@gmail.com', 12);
+    // The seeded main admin is meant for local demos. On a public deployment,
+    // set SEED_ADMIN_PASSWORD (render.yaml generates one) so the account is not
+    // reachable with the email as its password.
+    const mainAdminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin@gmail.com';
+    if (!process.env.SEED_ADMIN_PASSWORD && process.env.NODE_ENV === 'production') {
+      logger.warn('SEED_ADMIN_PASSWORD is not set; seeded main admin uses a default password');
+    }
+    const mainAdminHash = await bcrypt.hash(mainAdminPassword, 12);
     await client.query(
       `INSERT INTO users (email, password_hash, full_name, phone, role, points_balance, is_active)
        VALUES ($1, $2, $3, $4, $5, $6, true)

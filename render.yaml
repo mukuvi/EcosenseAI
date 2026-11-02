@@ -51,6 +51,8 @@ services:
           property: password
       - key: JWT_SECRET
         generateValue: true
+      - key: SEED_ADMIN_PASSWORD
+        generateValue: true
       - key: AI_SERVICE_URL
         value: http://ecosense-ai:10000
       # Photos must live on the disk, not the container filesystem.
