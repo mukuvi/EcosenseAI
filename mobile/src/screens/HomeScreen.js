@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import useAuthStore from '../store/authStore';
 import api from '../services/api';
 import ListenButton from '../components/ListenButton';
@@ -7,6 +8,7 @@ import { colors } from '../theme/colors';
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
+  const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const [reports, setReports] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -22,10 +24,16 @@ export default function HomeScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchReports();
+    await refreshProfile();
     setRefreshing(false);
   };
 
-  useEffect(() => { fetchReports(); }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchReports();
+      refreshProfile();
+    }, [refreshProfile])
+  );
 
   return (
     <View style={styles.container}>

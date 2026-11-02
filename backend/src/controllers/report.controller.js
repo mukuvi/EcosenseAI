@@ -3,6 +3,7 @@ const db = require('../db');
 const config = require('../config');
 const logger = require('../utils/logger');
 const elevenlabs = require('../services/elevenlabs.service');
+const aiService = require('../services/ai.service');
 exports.create = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -12,6 +13,9 @@ exports.create = async (req, res, next) => {
 
     const { latitude, longitude, address, description, waste_type, severity } = req.body;
     const imageUrls = req.files ? req.files.map((f) => `/uploads/${f.filename}`) : [];
+    const classification = req.files && req.files.length > 0
+      ? await aiService.classifyImage(req.files[0])
+      : null;
 
     const client = await db.getClient();
     try {
@@ -19,8 +23,8 @@ exports.create = async (req, res, next) => {
 
       const { rows } = await client.query(
         `INSERT INTO waste_reports
-          (reporter_id, latitude, longitude, address, description, waste_type, severity, image_urls, points_awarded)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          (reporter_id, latitude, longitude, address, description, waste_type, severity, image_urls, points_awarded, ai_waste_type, ai_confidence)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
          RETURNING *`,
         [
           req.user.id,
@@ -32,6 +36,8 @@ exports.create = async (req, res, next) => {
           severity || 'medium',
           imageUrls,
           config.points.perReport,
+          classification ? classification.wasteType : null,
+          classification ? classification.confidence : null,
         ]
       );
 
@@ -188,35 +194,60 @@ exports.updateStatus = async (req, res, next) => {
     }
 
     const { status } = req.body;
-    const { rows } = await db.query(
-      `UPDATE waste_reports SET status = $1, updated_at = NOW()
-       WHERE id = $2 RETURNING *`,
-      [status, req.params.id]
-    );
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Report not found' });
-    }
+      const { rows: currentRows } = await client.query(
+        'SELECT * FROM waste_reports WHERE id = $1 FOR UPDATE',
+        [req.params.id]
+      );
 
-    const report = rows[0];
-
-    if (status === 'verified') {
-      const bonusPoints = config.points.perVerifiedReport - config.points.perReport;
-      if (bonusPoints > 0) {
-        await db.query(
-          'UPDATE users SET points_balance = points_balance + $1 WHERE id = $2',
-          [bonusPoints, report.reporter_id]
-        );
-        await db.query(
-          `INSERT INTO point_transactions (user_id, amount, type, reference_type, reference_id, description)
-           VALUES ($1, $2, 'bonus', 'waste_report', $3, 'Bonus points for verified report')`,
-          [report.reporter_id, bonusPoints, report.id]
-        );
+      if (currentRows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Report not found' });
       }
-    }
 
-    logger.info(`Report ${report.id} status updated to ${status}`);
-    res.json({ report });
+      const current = currentRows[0];
+
+      if (current.status === status) {
+        await client.query('COMMIT');
+        return res.json({ report: current });
+      }
+
+      const { rows } = await client.query(
+        `UPDATE waste_reports SET status = $1, updated_at = NOW()
+         WHERE id = $2 RETURNING *`,
+        [status, req.params.id]
+      );
+
+      const report = rows[0];
+
+      if (status === 'verified') {
+        const bonusPoints = config.points.perVerifiedReport - config.points.perReport;
+        if (bonusPoints > 0) {
+          await client.query(
+            'UPDATE users SET points_balance = points_balance + $1 WHERE id = $2',
+            [bonusPoints, report.reporter_id]
+          );
+          await client.query(
+            `INSERT INTO point_transactions (user_id, amount, type, reference_type, reference_id, description)
+             VALUES ($1, $2, 'bonus', 'waste_report', $3, 'Bonus points for verified report')`,
+            [report.reporter_id, bonusPoints, report.id]
+          );
+        }
+      }
+
+      await client.query('COMMIT');
+
+      logger.info(`Report ${report.id} status updated to ${status}`);
+      res.json({ report });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     next(err);
   }

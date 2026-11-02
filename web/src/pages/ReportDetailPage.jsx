@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../services/api';
+import useAuthStore from '../store/authStore';
 import StatusBadge from '../components/StatusBadge';
 
 export default function ReportDetailPage() {
   const { id } = useParams();
+  const user = useAuthStore((s) => s.user);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [audioState, setAudioState] = useState('idle');
   const [audioError, setAudioError] = useState('');
+  const [statusError, setStatusError] = useState('');
+  const canManage = ['admin', 'field_agent', 'organization'].includes(user?.role);
 
   useEffect(() => {
     api.get(`/reports/${id}`)
@@ -18,11 +22,12 @@ export default function ReportDetailPage() {
   }, [id]);
 
   const handleStatusChange = async (newStatus) => {
+    setStatusError('');
     try {
       const { data } = await api.patch(`/reports/${id}/status`, { status: newStatus });
       setReport(data.report);
     } catch (err) {
-      console.error('Failed to update status', err);
+      setStatusError(err.response?.data?.error || 'Failed to update status');
     }
   };
 
@@ -122,21 +127,24 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        <div>
-          <p className="text-gray-500 text-sm mb-2">Update Status</p>
-          <div className="flex gap-2 flex-wrap">
-            {['verified', 'assigned', 'in_progress', 'resolved', 'rejected'].map((s) => (
-              <button
-                key={s}
-                onClick={() => handleStatusChange(s)}
-                disabled={report.status === s}
-                className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50 transition disabled:opacity-30 capitalize"
-              >
-                {s.replace('_', ' ')}
-              </button>
-            ))}
+        {canManage && (
+          <div>
+            <p className="text-gray-500 text-sm mb-2">Update Status</p>
+            <div className="flex gap-2 flex-wrap">
+              {['verified', 'assigned', 'in_progress', 'resolved', 'rejected'].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleStatusChange(s)}
+                  disabled={report.status === s}
+                  className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50 transition disabled:opacity-30 capitalize"
+                >
+                  {s.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+            {statusError && <p className="text-sm text-red-500 mt-2">{statusError}</p>}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

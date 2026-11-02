@@ -74,6 +74,34 @@ npm install
 npx expo start
 ```
 
+The same project runs on Android, iOS and the web. Press `a`, `i` or `w` in the Expo terminal, scan the QR code with Expo Go, or open `http://localhost:8081` for the web preview.
+
+### Mobile builds
+
+The app uses Expo Go compatible modules (`expo-camera`, `expo-location`, `expo-image-picker`, `expo-secure-store`, `expo-av`) plus `react-native-maps`. App icons and the splash screen live in `mobile/assets`.
+
+```bash
+cd mobile
+npm install -g eas-cli
+eas login
+eas build --platform android --profile preview
+eas build --platform ios --profile production
+```
+
+`eas.json` defines a `preview` profile that produces an installable APK and a `production` profile for store builds. Android builds run on Linux, macOS or Windows. iOS builds run on Expo's build servers, so a Mac is not required unless you build locally with Xcode.
+
+Expo Go includes a Google Maps key, but a standalone Android build needs your own key for the map tab. Add `android.config.googleMaps.apiKey` to `app.json` before building the APK. iOS uses Apple Maps and needs no key. Until a key is set, the rest of the app works and the map tab stays blank on Android.
+
+Set `EXPO_PUBLIC_API_URL` when building so the app points at your deployed API:
+
+```bash
+EXPO_PUBLIC_API_URL=https://your-api.onrender.com/api eas build --platform android --profile preview
+```
+
+## One database for web and mobile
+
+The mobile app and the web dashboard do not keep separate data. Both call the same Express API, which reads and writes one PostgreSQL database. A report submitted from the Android app appears in the web dashboard, points earned on the phone show up in the browser, and a status change made by an agency on the web is visible to the citizen in the app. The only local state on a device is the login token and the cached user profile.
+
 AI service:
 
 ```bash
@@ -99,7 +127,7 @@ Notes:
 - `ecosense-api` stores report photos on a 1 GB persistent disk mounted at `/app/uploads`. Container filesystems are ephemeral, so without the disk every deploy would delete the photos.
 - The seeded `admin@gmail.com` account takes its password from `SEED_ADMIN_PASSWORD`, which the blueprint generates. Read it under the service's **Environment** tab to sign in, and change the demo accounts' passwords before sharing the URL publicly.
 - The free Postgres plan is deleted after 30 days. Move to a paid plan before then, or the data goes with it.
-- `ecosense-ai` ships without a trained model, so it serves the heuristic classifier in `ai/app/ml/waste_classifier.py`. Commit a model to `ai/models/` or set `WASTE_CLASSIFIER_MODEL_PATH` to use a real one; TensorFlow is only imported when a `.keras`/`.h5` file is found.
+- `ecosense-ai` ships without a trained model, so it serves the heuristic classifier in `ai/app/ml/waste_classifier.py`. Commit a model to `ai/models/` or set `WASTE_CLASSIFIER_MODEL_PATH` to use a real one; TensorFlow is only imported when a `.keras`/`.h5` file is found. The API calls it on each report with a photo and stores the predicted type and confidence in `ai_waste_type` and `ai_confidence`. The hotspot page recomputes clusters from recent reports through the same service.
 - The dashboard is served by nginx (`web/Dockerfile.render`), which proxies `/api` and `/uploads` to the API service. One origin, no CORS setup, and relative API URLs keep working.
 - Local development is unchanged: `docker-compose up` still runs the Vite dev server through `web/Dockerfile`.
 

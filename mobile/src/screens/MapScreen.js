@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker, Callout, Circle } from 'react-native-maps';
 import api from '../services/api';
 import { colors } from '../theme/colors';
 
@@ -12,16 +12,29 @@ const SEVERITY_COLORS = { low: colors.primary500, medium: '#f59e0b', high: '#f97
 
 export default function MapScreen() {
   const [reports, setReports] = useState([]);
+  const [hotspots, setHotspots] = useState([]);
 
   useEffect(() => {
     api.get('/reports?limit=100')
       .then(({ data }) => setReports(data.reports))
+      .catch(console.error);
+    api.get('/hotspots')
+      .then(({ data }) => setHotspots(data.hotspots))
       .catch(console.error);
   }, []);
 
   return (
     <View style={styles.container}>
       <MapView style={styles.map} initialRegion={NAIROBI} showsUserLocation>
+        {hotspots.map((h) => (
+          <Circle
+            key={h.id}
+            center={{ latitude: h.latitude, longitude: h.longitude }}
+            radius={h.radius_meters || 500}
+            strokeColor="rgba(239, 68, 68, 0.6)"
+            fillColor="rgba(239, 68, 68, 0.15)"
+          />
+        ))}
         {reports.map((r) => (
           <Marker
             key={r.id}

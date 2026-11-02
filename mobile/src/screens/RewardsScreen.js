@@ -7,9 +7,15 @@ import { colors } from '../theme/colors';
 export default function RewardsScreen() {
   const [rewards, setRewards] = useState([]);
   const user = useAuthStore((s) => s.user);
+  const refreshProfile = useAuthStore((s) => s.refreshProfile);
+
+  const fetchRewards = async () => {
+    const { data } = await api.get('/rewards');
+    setRewards(data.rewards);
+  };
 
   useEffect(() => {
-    api.get('/rewards').then(({ data }) => setRewards(data.rewards)).catch(console.error);
+    fetchRewards().catch(console.error);
   }, []);
 
   const handleRedeem = async (reward) => {
@@ -24,6 +30,8 @@ export default function RewardsScreen() {
         onPress: async () => {
           try {
             await api.post(`/rewards/${reward.id}/redeem`);
+            await refreshProfile();
+            await fetchRewards();
             Alert.alert('Success! 🎉', `You've redeemed "${reward.title}"`);
           } catch (err) {
             Alert.alert('Error', err.response?.data?.error || 'Redemption failed');

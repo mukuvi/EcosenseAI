@@ -1,6 +1,9 @@
 const db = require('../db');
+const hotspotService = require('../services/hotspot.service');
 exports.list = async (_req, res, next) => {
   try {
+    await hotspotService.refresh();
+
     const { rows } = await db.query(
       `SELECT * FROM hotspots
        ORDER BY risk_score DESC

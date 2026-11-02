@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, Platform, ScrollView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import api from '../services/api';
+import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
 
 const WASTE_TYPES = ['plastic', 'organic', 'electronic', 'hazardous', 'construction', 'medical', 'textile', 'mixed', 'other'];
 const SEVERITY_LEVELS = ['low', 'medium', 'high', 'critical'];
 
-export default function ReportScreen() {
+export default function ReportScreen({ navigation }) {
+  const refreshProfile = useAuthStore((s) => s.refreshProfile);
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState('');
   const [wasteType, setWasteType] = useState('');
@@ -17,10 +19,15 @@ export default function ReportScreen() {
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-    });
+    const result = Platform.OS === 'web'
+      ? await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+      })
+      : await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+      });
     if (!result.canceled) {
       setImages((prev) => [...prev, result.assets[0]]);
     }
@@ -67,6 +74,8 @@ export default function ReportScreen() {
       setWasteType('');
       setSeverity('medium');
       setLocation(null);
+      await refreshProfile();
+      navigation?.navigate('Home');
     } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Failed to submit report');
     } finally {
@@ -77,7 +86,7 @@ export default function ReportScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
-        <Text style={styles.cameraText}>📸 Take Photo</Text>
+        <Text style={styles.cameraText}>{Platform.OS === 'web' ? '📷 Choose Photo' : '📸 Take Photo'}</Text>
       </TouchableOpacity>
 
       {images.length > 0 && (

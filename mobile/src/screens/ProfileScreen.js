@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -34,16 +34,22 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.section}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Home')}>
           <Text style={styles.menuText}>📊 My Reports</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Rewards')}>
           <Text style={styles.menuText}>🎁 Redemption History</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => Alert.alert('Settings', 'Profile settings are coming soon.')}
+        >
           <Text style={styles.menuText}>⚙️ Settings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity
+          style={styles.menuItem}
+          onPress={() => Alert.alert('EcoSense AI', 'Report waste, earn points, and help keep your community clean.')}
+        >
           <Text style={styles.menuText}>ℹ️ About EcoSense AI</Text>
         </TouchableOpacity>
       </View>
