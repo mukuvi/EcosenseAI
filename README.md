@@ -137,7 +137,7 @@ uvicorn app.main:app --reload
 1. Push this repo, then in Render choose **New → Blueprint** and pick the repo.
 2. Deploy. `ecosense-api` runs migrations automatically before each release; seed demo data once from the service shell with `node src/db/seed.js`.
 3. Optionally attach a domain you already control to `ecosense-web` in **Settings → Custom Domains**, for example `reports.yourdomain.com`, and point `api.yourdomain.com` at `ecosense-api`. Skip this if you don't need one: the `*.onrender.com` URLs work as-is.
-4. Build the mobile app with `EXPO_PUBLIC_API_URL=https://<your-api-domain-or-onrender-url>/api` so it talks to the deployed API. `mobile/.env.example` shows the shape; `api.ecosense.co.ke` is only the current default.
+4. Build the mobile app with `EXPO_PUBLIC_API_URL=https://<your-api-domain-or-onrender-url>/api` so it talks to the deployed API. `mobile/.env.example` shows the shape; the current default is `https://ecosense.mukuvi.tech/api`.
 
 Notes:
 
@@ -149,6 +149,26 @@ Notes:
 - `ecosense-ai` is on the Render standard plan because TensorFlow inference needs more than the 512 MB starter instance.
 - The dashboard is served by nginx (`web/Dockerfile.render`), which proxies `/api` and `/uploads` to the API service. One origin, no CORS setup, and relative API URLs keep working.
 - Local development is unchanged: `docker-compose up` still runs the Vite dev server through `web/Dockerfile`.
+
+## Deploy on Oracle Cloud
+
+`docker-compose.oracle.yml` runs the full stack on a single x86_64 VM: Postgres, the API, the AI service and the nginx web image. It is sized for a 1 GB Always Free AMD instance.
+
+```bash
+git clone https://github.com/mukuvi/EcosenseAI.git /opt/ecosense
+cd /opt/ecosense
+cp deploy/oracle/.env.example .env
+```
+
+Set `DB_PASSWORD`, `JWT_SECRET` and `SEED_ADMIN_PASSWORD` in `.env`, then:
+
+```bash
+sudo docker compose -f docker-compose.oracle.yml build
+sudo docker compose -f docker-compose.oracle.yml up -d
+sudo docker compose -f docker-compose.oracle.yml exec -T backend node src/db/seed.js
+```
+
+The web image binds to `127.0.0.1:8088`. Put the host nginx config from `deploy/oracle/` in front of it, point the domain at the VM, and issue a certificate with `certbot --nginx`. The live deployment uses `https://ecosense.mukuvi.tech`.
 
 ## Tech
 
