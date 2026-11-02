@@ -90,8 +90,8 @@ uvicorn app.main:app --reload
 
 1. Push this repo, then in Render choose **New → Blueprint** and pick the repo.
 2. Deploy. `ecosense-api` runs migrations automatically before each release; seed demo data once from the service shell with `node src/db/seed.js`.
-3. Attach a custom domain to `ecosense-web` (for example `ecosense.tech`) in **Settings → Custom Domains**. Point `api.ecosense.tech` at `ecosense-api` if you want a separate API hostname.
-4. Build the mobile app with `EXPO_PUBLIC_API_URL=https://<your-domain>/api` so it talks to the deployed API.
+3. Optionally attach a domain you already control to `ecosense-web` in **Settings → Custom Domains**, for example `reports.yourdomain.com`, and point `api.yourdomain.com` at `ecosense-api`. Skip this if you don't need one: the `*.onrender.com` URLs work as-is.
+4. Build the mobile app with `EXPO_PUBLIC_API_URL=https://<your-api-domain-or-onrender-url>/api` so it talks to the deployed API. `mobile/.env.example` shows the shape; `api.ecosense.co.ke` is only the current default.
 
 Notes:
 
