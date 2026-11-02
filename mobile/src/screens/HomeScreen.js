@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import useAuthStore from '../store/authStore';
 import api from '../services/api';
+import ListenButton from '../components/ListenButton';
 import { colors } from '../theme/colors';
 
 export default function HomeScreen() {
@@ -48,7 +49,10 @@ export default function HomeScreen() {
               <Text style={[styles.status, statusStyle(item.status)]}>{item.status}</Text>
             </View>
             <Text style={styles.description} numberOfLines={2}>{item.description || 'No description'}</Text>
-            <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString()}</Text>
+            <View style={styles.reportFooter}>
+              <Text style={styles.date}>{new Date(item.created_at).toLocaleDateString()}</Text>
+              {item.reporter_id === user?.id && <ListenButton reportId={item.id} />}
+            </View>
           </View>
         )}
         ListEmptyComponent={<Text style={styles.empty}>No reports yet. Start reporting waste!</Text>}
@@ -83,6 +87,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8, elevation: 2,
   },
   reportHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  reportFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   wasteType: { fontSize: 14, fontWeight: '600', textTransform: 'capitalize' },
   status: { fontSize: 12, fontWeight: '600', textTransform: 'capitalize' },
   description: { fontSize: 13, color: '#6b7280', marginBottom: 4 },
