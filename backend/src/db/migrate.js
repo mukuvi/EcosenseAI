@@ -124,10 +124,52 @@ CREATE TABLE IF NOT EXISTS hotspots (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS report_status_history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  report_id UUID NOT NULL REFERENCES waste_reports(id) ON DELETE CASCADE,
+  from_status VARCHAR(30),
+  to_status VARCHAR(30) NOT NULL,
+  changed_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  note TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  body TEXT,
+  data JSONB NOT NULL DEFAULT '{}'::jsonb,
+  read_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS push_tokens (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT UNIQUE NOT NULL,
+  platform VARCHAR(20),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  last_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO report_status_history (report_id, from_status, to_status, created_at)
+SELECT wr.id, NULL, wr.status, wr.created_at
+FROM waste_reports wr
+WHERE NOT EXISTS (
+  SELECT 1 FROM report_status_history h WHERE h.report_id = wr.id
+);
+
 CREATE INDEX IF NOT EXISTS idx_waste_reports_reporter ON waste_reports(reporter_id);
 CREATE INDEX IF NOT EXISTS idx_waste_reports_status ON waste_reports(status);
 CREATE INDEX IF NOT EXISTS idx_waste_reports_location ON waste_reports(latitude, longitude);
 CREATE INDEX IF NOT EXISTS idx_report_assignments_report ON report_assignments(report_id);
+CREATE INDEX IF NOT EXISTS idx_report_assignments_agent ON report_assignments(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_report_status_history_report ON report_status_history(report_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id) WHERE read_at IS NULL;
+CREATE INDEX IF NOT EXISTS idx_push_tokens_user ON push_tokens(user_id);
 CREATE INDEX IF NOT EXISTS idx_point_transactions_user ON point_transactions(user_id);
 CREATE INDEX IF NOT EXISTS idx_reward_redemptions_user ON reward_redemptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_hotspots_location ON hotspots(latitude, longitude);

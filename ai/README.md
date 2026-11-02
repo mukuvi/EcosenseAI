@@ -1,4 +1,4 @@
-# EcoSense AI — AI Service
+# EcoSense AI - AI Service
 
 Python-based microservice for waste image classification, hotspot prediction, and route optimization.
 

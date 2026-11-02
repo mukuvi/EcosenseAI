@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import useAuthStore from '../store/authStore';
 
 const adminNav = [
@@ -7,6 +9,7 @@ const adminNav = [
   { to: '/admin/hotspots', label: 'Hotspots' },
   { to: '/admin/users', label: 'Users' },
   { to: '/admin/rewards', label: 'Rewards' },
+  { to: '/notifications', label: 'Notifications' },
 ];
 
 const citizenNav = [
@@ -14,18 +17,21 @@ const citizenNav = [
   { to: '/citizen/reports', label: 'My Reports' },
   { to: '/citizen/report/new', label: 'Report Waste' },
   { to: '/citizen/rewards', label: 'Rewards' },
+  { to: '/notifications', label: 'Notifications' },
 ];
 
 const agentNav = [
   { to: '/agent', label: 'Dashboard' },
   { to: '/agent/reports', label: 'Reports' },
   { to: '/agent/hotspots', label: 'Hotspots' },
+  { to: '/notifications', label: 'Notifications' },
 ];
 
 const organizationNav = [
   { to: '/org', label: 'Dashboard' },
   { to: '/org/reports', label: 'Reports' },
   { to: '/org/hotspots', label: 'Hotspots' },
+  { to: '/notifications', label: 'Notifications' },
 ];
 
 const roleLabels = {
@@ -47,6 +53,24 @@ export default function Layout() {
   const navigate = useNavigate();
   const role = user?.role || 'citizen';
   const navItems = getNavItems(role);
+  const [unread, setUnread] = useState(0);
+
+  useEffect(() => {
+    const refreshUnread = () => {
+      api.get('/notifications')
+        .then(({ data }) => setUnread(data.unread))
+        .catch(() => {});
+    };
+
+    refreshUnread();
+    const timer = setInterval(refreshUnread, 30000);
+    window.addEventListener('notifications:changed', refreshUnread);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('notifications:changed', refreshUnread);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -76,6 +100,11 @@ export default function Layout() {
               }
             >
               <span>{item.label}</span>
+              {item.to === '/notifications' && unread > 0 && (
+                <span className="ml-auto text-xs bg-primary-500 text-white rounded-full px-2 py-0.5">
+                  {unread}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>

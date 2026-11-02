@@ -8,11 +8,19 @@ export default function AgentReportsPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [scope, setScope] = useState('mine');
   const limit = 20;
 
   useEffect(() => {
     const fetchReports = async () => {
       try {
+        if (scope === 'mine') {
+          const { data } = await api.get('/reports/assigned');
+          setReports(data.reports);
+          setTotal(data.total);
+          return;
+        }
+
         const params = { page, limit };
         if (statusFilter) params.status = statusFilter;
         const { data } = await api.get('/reports', { params });
@@ -23,11 +31,16 @@ export default function AgentReportsPage() {
       }
     };
     fetchReports();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, scope]);
 
   const handleStatusChange = async (reportId, newStatus) => {
     try {
       const { data } = await api.patch(`/reports/${reportId}/status`, { status: newStatus });
+      if (scope === 'mine' && newStatus === 'resolved') {
+        setReports((prev) => prev.filter((r) => r.id !== reportId));
+        setTotal((t) => Math.max(0, t - 1));
+        return;
+      }
       setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, ...data.report } : r)));
     } catch (err) {
       console.error('Failed to update status', err);
@@ -40,19 +53,37 @@ export default function AgentReportsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold">Waste Reports</h2>
-        <select
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-        >
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="verified">Verified</option>
-          <option value="assigned">Assigned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="rejected">Rejected</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+            <button
+              onClick={() => { setScope('mine'); setPage(1); }}
+              className={`px-3 py-2 text-sm ${scope === 'mine' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
+            >
+              Assigned to me
+            </button>
+            <button
+              onClick={() => { setScope('all'); setPage(1); }}
+              className={`px-3 py-2 text-sm ${scope === 'all' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
+            >
+              All reports
+            </button>
+          </div>
+          {scope === 'all' && (
+            <select
+              value={statusFilter}
+              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+            >
+              <option value="">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+              <option value="assigned">Assigned</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">

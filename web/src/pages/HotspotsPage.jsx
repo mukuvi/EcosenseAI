@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Circle, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import api from '../services/api';
+
+const NAIROBI = [-1.2921, 36.8219];
+
+function hotspotColor(score) {
+  if (score > 0.7) return '#2F5D50';
+  if (score > 0.4) return '#3AA335';
+  return '#9CAF88';
+}
 
 export default function HotspotsPage() {
   const [hotspots, setHotspots] = useState([]);
@@ -16,9 +26,35 @@ export default function HotspotsPage() {
       </p>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-          <p>Map visualization - integrate <code>react-leaflet</code> with hotspot markers</p>
+        <div className="h-96 rounded-lg overflow-hidden">
+          <MapContainer center={NAIROBI} zoom={11} scrollWheelZoom>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {hotspots.map((hotspot) => (
+              <Circle
+                key={hotspot.id}
+                center={[hotspot.latitude, hotspot.longitude]}
+                radius={hotspot.radius_meters}
+                pathOptions={{
+                  color: hotspotColor(hotspot.risk_score),
+                  fillColor: hotspotColor(hotspot.risk_score),
+                  fillOpacity: 0.2,
+                }}
+              >
+                <Popup>
+                  <strong>Risk {(hotspot.risk_score * 100).toFixed(0)}%</strong>
+                  <br />
+                  {hotspot.report_count} reports in this cluster
+                </Popup>
+              </Circle>
+            ))}
+          </MapContainer>
         </div>
+        {hotspots.length === 0 && (
+          <p className="text-sm text-gray-400 mt-3">No hotspots predicted yet. Submit more reports in the same area.</p>
+        )}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
+import json
 import os
 
 import numpy as np
@@ -21,6 +22,17 @@ WASTE_LABELS: list[str] = [
     "mixed",
     "other",
 ]
+
+TRASHNET_LABELS: list[str] = ["cardboard", "glass", "metal", "paper", "plastic", "trash"]
+
+TRASHNET_TO_WASTE: dict[str, str] = {
+    "cardboard": "construction",
+    "glass": "other",
+    "metal": "other",
+    "paper": "other",
+    "plastic": "plastic",
+    "trash": "mixed",
+}
 
 
 ModelKind = Literal["tensorflow", "sklearn", "heuristic"]
@@ -130,6 +142,37 @@ class WasteClassifier:
         self._model: Any | None
 
         self.model_kind, self.model_path, self._model = self._load_model()
+        self.source_labels = (
+            self._load_source_labels(Path(self.model_path))
+            if self.model_kind == "tensorflow" and self.model_path
+            else list(WASTE_LABELS)
+        )
+        self.input_scale = (
+            self._load_input_scale(Path(self.model_path))
+            if self.model_kind == "tensorflow" and self.model_path
+            else 1.0
+        )
+
+    def _load_input_scale(self, model_path: Path) -> float:
+        meta_path = model_path.parent / "waste_classifier_meta.json"
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text())
+                return float(meta.get("input_scale", 1.0))
+            except Exception:
+                return 1.0
+        return 1.0
+
+    def _load_source_labels(self, model_path: Path) -> list[str]:
+        labels_path = model_path.parent / "waste_classifier_labels.json"
+        if labels_path.exists():
+            try:
+                labels = json.loads(labels_path.read_text())
+                if isinstance(labels, list) and labels:
+                    return [str(label) for label in labels]
+            except Exception:
+                pass
+        return list(TRASHNET_LABELS)
 
     def _load_model(self) -> tuple[ModelKind, str | None, Any | None]:
         explicit_path = os.getenv("WASTE_CLASSIFIER_MODEL_PATH")
@@ -175,18 +218,21 @@ class WasteClassifier:
         image_rgb = _preprocess_image_rgb(image_bytes)
 
         if self.model_kind == "tensorflow" and self._model is not None:
-            x = np.expand_dims(image_rgb, axis=0)
+            x = np.expand_dims(image_rgb * self.input_scale, axis=0)
             preds = self._model.predict(x, verbose=0)
             preds = np.asarray(preds).reshape(-1)
-            if preds.shape[0] != len(self.labels):
-                features = _extract_features(image_rgb)
-                logits = _heuristic_logits(features)
-                return _softmax(logits)
-            preds = np.clip(preds.astype(np.float64), 0.0, None)
-            s = preds.sum()
-            if s <= 0:
-                return np.ones(len(self.labels), dtype=np.float64) / len(self.labels)
-            return (preds / s).astype(np.float64)
+            if preds.shape[0] == len(self.labels):
+                return self._normalise(preds)
+            if preds.shape[0] == len(self.source_labels):
+                mapped = np.zeros(len(self.labels), dtype=np.float64)
+                for index, label in enumerate(self.source_labels):
+                    target = TRASHNET_TO_WASTE.get(label)
+                    if target is not None:
+                        mapped[self.labels.index(target)] += float(preds[index])
+                return self._normalise(mapped)
+            features = _extract_features(image_rgb)
+            logits = _heuristic_logits(features)
+            return _softmax(logits)
 
         features = _extract_features(image_rgb)
 
@@ -194,20 +240,23 @@ class WasteClassifier:
             try:
                 proba = self._model.predict_proba([features])[0]
                 proba = np.asarray(proba, dtype=np.float64).reshape(-1)
-                if proba.shape[0] != len(self.labels):
-                    logits = _heuristic_logits(features)
-                    return _softmax(logits)
-                proba = np.clip(proba, 0.0, None)
-                s = proba.sum()
-                if s <= 0:
-                    return np.ones(len(self.labels), dtype=np.float64) / len(self.labels)
-                return (proba / s).astype(np.float64)
+                if proba.shape[0] == len(self.labels):
+                    return self._normalise(proba)
+                logits = _heuristic_logits(features)
+                return _softmax(logits)
             except Exception:
                 logits = _heuristic_logits(features)
                 return _softmax(logits)
 
         logits = _heuristic_logits(features)
         return _softmax(logits)
+
+    def _normalise(self, values: np.ndarray) -> np.ndarray:
+        values = np.clip(np.asarray(values, dtype=np.float64), 0.0, None)
+        total = values.sum()
+        if total <= 0:
+            return np.ones(len(self.labels), dtype=np.float64) / len(self.labels)
+        return (values / total).astype(np.float64)
 
     def classify(self, image_bytes: bytes) -> Classification:
         proba = self.predict_proba(image_bytes)

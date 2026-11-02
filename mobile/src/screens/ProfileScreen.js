@@ -34,6 +34,9 @@ export default function ProfileScreen({ navigation }) {
       </View>
 
       <View style={styles.section}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Notifications')}>
+          <Text style={styles.menuText}>🔔 Notifications</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Home')}>
           <Text style={styles.menuText}>📊 My Reports</Text>
         </TouchableOpacity>

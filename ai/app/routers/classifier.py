@@ -24,6 +24,7 @@ class ClassificationResult(BaseModel):
     waste_type: str
     confidence: float
     all_predictions: dict[str, float]
+    model_kind: str
 
 
 @router.post("/classify", response_model=ClassificationResult)
@@ -43,6 +44,7 @@ async def classify_waste(image: UploadFile = File(...)):
             waste_type=result.waste_type,
             confidence=result.confidence,
             all_predictions=result.all_predictions,
+            model_kind=result.model_kind,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Classification failed: {str(e)}")

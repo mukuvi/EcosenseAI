@@ -12,22 +12,59 @@ export default function ReportDetailPage() {
   const [audioState, setAudioState] = useState('idle');
   const [audioError, setAudioError] = useState('');
   const [statusError, setStatusError] = useState('');
+  const [history, setHistory] = useState([]);
+  const [agents, setAgents] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState('');
+  const [assignError, setAssignError] = useState('');
+  const [assigning, setAssigning] = useState(false);
   const canManage = ['admin', 'field_agent', 'organization'].includes(user?.role);
+  const canAssign = ['admin', 'organization'].includes(user?.role);
+
+  const fetchHistory = () =>
+    api.get(`/reports/${id}/history`)
+      .then(({ data }) => setHistory(data.history))
+      .catch(console.error);
 
   useEffect(() => {
     api.get(`/reports/${id}`)
       .then(({ data }) => setReport(data.report))
       .catch(console.error)
       .finally(() => setLoading(false));
+    fetchHistory();
   }, [id]);
+
+  useEffect(() => {
+    if (!canAssign) return;
+    api.get('/users/field-agents')
+      .then(({ data }) => setAgents(data.agents))
+      .catch(console.error);
+  }, [canAssign]);
 
   const handleStatusChange = async (newStatus) => {
     setStatusError('');
     try {
-      const { data } = await api.patch(`/reports/${id}/status`, { status: newStatus });
-      setReport(data.report);
+      await api.patch(`/reports/${id}/status`, { status: newStatus });
+      const detail = await api.get(`/reports/${id}`);
+      setReport(detail.data.report);
+      fetchHistory();
     } catch (err) {
       setStatusError(err.response?.data?.error || 'Failed to update status');
+    }
+  };
+
+  const handleAssign = async () => {
+    if (!selectedAgent) return;
+    setAssignError('');
+    setAssigning(true);
+    try {
+      const { data } = await api.patch(`/reports/${id}/assign`, { assigned_to: selectedAgent });
+      setReport(data.report);
+      setSelectedAgent('');
+      fetchHistory();
+    } catch (err) {
+      setAssignError(err.response?.data?.error || 'Failed to assign report');
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -95,6 +132,10 @@ export default function ReportDetailPage() {
             <p>{report.points_awarded}</p>
           </div>
           <div>
+            <p className="text-gray-500">Assigned To</p>
+            <p>{report.assignment?.assigned_to_name || 'Unassigned'}</p>
+          </div>
+          <div>
             <p className="text-gray-500">AI Classification</p>
             <p>{report.ai_waste_type || 'Pending'} {report.ai_confidence ? `(${(report.ai_confidence * 100).toFixed(1)}%)` : ''}</p>
           </div>
@@ -127,6 +168,39 @@ export default function ReportDetailPage() {
           </div>
         )}
 
+        {canAssign && (
+          <div>
+            <p className="text-gray-500 text-sm mb-2">Assign to a field agent</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={selectedAgent}
+                onChange={(e) => setSelectedAgent(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">Select a field agent</option>
+                {agents.map((agent) => (
+                  <option key={agent.id} value={agent.id}>
+                    {agent.full_name} ({agent.email})
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleAssign}
+                disabled={!selectedAgent || assigning}
+                className="px-4 py-2 text-sm rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition disabled:opacity-50"
+              >
+                {assigning ? 'Assigning...' : 'Assign'}
+              </button>
+            </div>
+            {report.assignment && (
+              <p className="text-xs text-gray-500 mt-2">
+                Currently assigned to {report.assignment.assigned_to_name}
+              </p>
+            )}
+            {assignError && <p className="text-sm text-red-500 mt-2">{assignError}</p>}
+          </div>
+        )}
+
         {canManage && (
           <div>
             <p className="text-gray-500 text-sm mb-2">Update Status</p>
@@ -145,6 +219,31 @@ export default function ReportDetailPage() {
             {statusError && <p className="text-sm text-red-500 mt-2">{statusError}</p>}
           </div>
         )}
+
+        <div>
+          <p className="text-gray-500 text-sm mb-3">Status history</p>
+          {history.length === 0 ? (
+            <p className="text-sm text-gray-400">No status changes recorded yet.</p>
+          ) : (
+            <ol className="space-y-3">
+              {history.map((entry) => (
+                <li key={entry.id} className="flex gap-3">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-primary-500 shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium capitalize">
+                      {entry.from_status ? `${entry.from_status.replace('_', ' ')} to ` : ''}
+                      {entry.to_status.replace('_', ' ')}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {entry.changed_by_name || 'System'}, {new Date(entry.created_at).toLocaleString()}
+                      {entry.note ? `, ${entry.note}` : ''}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
       </div>
     </div>
   );

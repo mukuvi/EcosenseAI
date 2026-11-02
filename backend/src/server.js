@@ -14,6 +14,7 @@ const reportRoutes = require('./routes/report.routes');
 const rewardRoutes = require('./routes/reward.routes');
 const userRoutes = require('./routes/user.routes');
 const hotspotRoutes = require('./routes/hotspot.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/rewards', rewardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/hotspots', hotspotRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.use(errorHandler);
 

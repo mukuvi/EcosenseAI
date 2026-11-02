@@ -9,6 +9,8 @@ router.use(authenticate);
 
 router.get('/points', userController.getPoints);
 
+router.get('/field-agents', authorize('admin', 'organization'), userController.listFieldAgents);
+
 router.get('/', authorize('admin'), userController.listUsers);
 
 router.post(

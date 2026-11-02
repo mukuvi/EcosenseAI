@@ -49,7 +49,11 @@ router.get(
   reportController.list
 );
 
+router.get('/assigned', reportController.listAssigned);
+
 router.get('/:id/audio', reportController.getAudio);
+
+router.get('/:id/history', reportController.getHistory);
 
 router.get('/:id', reportController.getById);
 
@@ -57,6 +61,15 @@ router.patch(
   '/:id/status',
   [body('status').isIn(['verified', 'assigned', 'in_progress', 'resolved', 'rejected'])],
   reportController.updateStatus
+);
+
+router.patch(
+  '/:id/assign',
+  [
+    body('assigned_to').isUUID(),
+    body('notes').optional().trim(),
+  ],
+  reportController.assign
 );
 
 module.exports = router;

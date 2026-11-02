@@ -1,5 +1,5 @@
 """
-EcoSense AI — AI Microservice
+EcoSense AI - AI Microservice
 FastAPI application for waste classification, hotspot prediction, and route optimization.
 """
 
@@ -30,3 +30,10 @@ app.include_router(optimizer.router, prefix="/ai", tags=["Route Optimization"])
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "ecosense-ai-ml"}
+
+
+@app.on_event("startup")
+def warm_classifier():
+    from app.routers.classifier import _get_classifier
+
+    _get_classifier()

@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const db = require('../db');
 const logger = require('../utils/logger');
+const notificationService = require('../services/notification.service');
 exports.list = async (_req, res, next) => {
   try {
     const { rows } = await db.query(
@@ -68,6 +69,13 @@ exports.redeem = async (req, res, next) => {
     );
 
     await client.query('COMMIT');
+
+    notificationService.create(req.user.id, {
+      type: 'reward_redemption',
+      title: 'Reward redeemed',
+      body: `${reward.title} was redeemed for ${reward.points_cost} points.`,
+      data: { rewardId: reward.id },
+    }).catch((err) => logger.warn(`Notification failed: ${err.message}`));
 
     logger.info(`User ${req.user.id} redeemed reward ${reward.id}`);
     res.status(201).json({ redemption: redemptionRows[0] });

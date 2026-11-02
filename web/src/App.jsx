@@ -17,6 +17,7 @@ import CitizenRewardsPage from './pages/citizen/CitizenRewardsPage';
 import AgentDashboard from './pages/agent/AgentDashboard';
 import AgentReportsPage from './pages/agent/AgentReportsPage';
 import OrganizationDashboard from './pages/org/OrganizationDashboard';
+import NotificationsPage from './pages/NotificationsPage';
 
 const roleLanding = {
   admin: '/admin',
@@ -79,6 +80,17 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<NotificationsPage />} />
+      </Route>
 
       <Route
         path="/admin"

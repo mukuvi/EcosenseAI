@@ -62,7 +62,7 @@ services:
     name: ecosense-ai
     runtime: docker
     region: frankfurt
-    plan: starter
+    plan: standard
     rootDir: ai
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health

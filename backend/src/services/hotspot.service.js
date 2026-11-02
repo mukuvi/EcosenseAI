@@ -49,7 +49,7 @@ async function runRefresh() {
       response = await fetch(`${config.ai.serviceUrl}/ai/hotspots/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reports, eps_km: 0.5, min_samples: 2 }),
+        body: JSON.stringify({ reports, eps_km: 1.0, min_samples: 2 }),
         signal: controller.signal,
       });
     } finally {

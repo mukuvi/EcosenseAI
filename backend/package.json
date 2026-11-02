@@ -1,7 +1,7 @@
 {
   "name": "ecosense-ai-backend",
   "version": "1.0.0",
-  "description": "EcoSense AI Backend API — waste pollution reporting platform",
+  "description": "EcoSense AI Backend API - waste pollution reporting platform",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

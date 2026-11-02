@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
+import { registerForPushNotifications } from '../services/push';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -11,6 +12,8 @@ import ReportScreen from '../screens/ReportScreen';
 import MapScreen from '../screens/MapScreen';
 import RewardsScreen from '../screens/RewardsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import ReportDetailScreen from '../screens/ReportDetailScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -54,6 +57,12 @@ function MainTabs() {
   );
 }
 
+const stackScreenOptions = {
+  headerShown: true,
+  headerStyle: { backgroundColor: colors.primary600 },
+  headerTintColor: '#fff',
+};
+
 export default function RootNavigator() {
   const { token, isLoading, init } = useAuthStore();
 
@@ -61,12 +70,30 @@ export default function RootNavigator() {
     init();
   }, []);
 
+  useEffect(() => {
+    if (token) {
+      registerForPushNotifications().catch(() => {});
+    }
+  }, [token]);
+
   if (isLoading) return null;
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {token ? (
-        <Stack.Screen name="Main" component={MainTabs} />
+        <>
+          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen
+            name="ReportDetail"
+            component={ReportDetailScreen}
+            options={{ ...stackScreenOptions, title: 'Report details' }}
+          />
+          <Stack.Screen
+            name="Notifications"
+            component={NotificationsScreen}
+            options={{ ...stackScreenOptions, title: 'Notifications' }}
+          />
+        </>
       ) : (
         <>
           <Stack.Screen name="Login" component={LoginScreen} />

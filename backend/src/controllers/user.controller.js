@@ -23,6 +23,21 @@ exports.getPoints = async (req, res, next) => {
     next(err);
   }
 };
+exports.listFieldAgents = async (_req, res, next) => {
+  try {
+    const { rows } = await db.query(
+      `SELECT id, email, full_name, phone
+       FROM users
+       WHERE role = 'field_agent' AND is_active = true
+       ORDER BY full_name ASC`
+    );
+
+    res.json({ agents: rows });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.listUsers = async (req, res, next) => {
   try {
     const { page = 1, limit = 20 } = req.query;
