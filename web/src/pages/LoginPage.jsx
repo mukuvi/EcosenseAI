@@ -38,6 +38,9 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
+          <span className="inline-block mt-3 px-3 py-1 rounded-full bg-sage-50 text-ink border border-sage-200 text-xs font-medium">
+            Ready for production
+          </span>
         </div>
 
         {error && (

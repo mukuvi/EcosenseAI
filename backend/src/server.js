@@ -18,8 +18,27 @@ const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
+app.set('trust proxy', 1);
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = (process.env.CORS_ORIGINS || [
+  'https://ecosense.mukuvi.tech',
+  'https://ecosense.84-12-76-11.sslip.io',
+  'http://localhost:3000',
+  'http://localhost:3100',
+  'http://localhost:8081',
+].join(','))
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(null, false);
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));

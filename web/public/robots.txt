@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /agent
+Disallow: /org
+Disallow: /citizen
+Disallow: /api
+
+Sitemap: https://ecosense.mukuvi.tech/sitemap.xml

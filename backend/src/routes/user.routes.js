@@ -18,7 +18,10 @@ router.post(
 	authorize('admin'),
 	[
 		body('email').isEmail().normalizeEmail(),
-		body('password').isLength({ min: 6 }),
+		body('password')
+			.isLength({ min: 8 })
+			.matches(/[A-Za-z]/)
+			.matches(/[0-9]/),
 		body('full_name').trim().notEmpty(),
 		body('phone').optional().isMobilePhone(),
 		body('role').isIn(['citizen', 'admin', 'field_agent', 'organization']),

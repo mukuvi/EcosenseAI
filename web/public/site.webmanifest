@@ -1,0 +1,17 @@
+{
+  "name": "EcoSense AI",
+  "short_name": "EcoSense",
+  "description": "Waste reporting and cleanup operations platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F7F2",
+  "theme_color": "#3AA335",
+  "icons": [
+    {
+      "src": "/ecosense-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="EcoSense AI">
+  <rect width="64" height="64" rx="14" fill="#3AA335"/>
+  <path d="M32 12c10 6 16 14 16 23 0 9-7 16-16 16S16 44 16 35c0-9 6-17 16-23z" fill="#ffffff"/>
+  <path d="M32 47V24" stroke="#3AA335" stroke-width="3" stroke-linecap="round"/>
+  <path d="M32 33l7-6M32 38l-7-6" stroke="#3AA335" stroke-width="3" stroke-linecap="round"/>
+</svg>

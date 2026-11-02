@@ -50,6 +50,9 @@ export default function RegisterPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
           <p className="text-gray-500 mt-2">Choose your portal and create an account</p>
+          <span className="inline-block mt-3 px-3 py-1 rounded-full bg-sage-50 text-ink border border-sage-200 text-xs font-medium">
+            Ready for production
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2 mb-5">
@@ -111,8 +114,8 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Min. 6 characters"
-              minLength={6}
+              placeholder="Min. 8 characters, letters and numbers"
+              minLength={8}
               required
             />
           </div>

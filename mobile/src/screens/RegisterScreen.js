@@ -13,6 +13,9 @@ export default function RegisterScreen({ navigation }) {
     if (!form.email || !form.password || !form.full_name) {
       return Alert.alert('Error', 'Please fill in all required fields');
     }
+    if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+      return Alert.alert('Error', 'Password must be at least 8 characters and include a letter and a number');
+    }
     setLoading(true);
     try {
       await register(form.email, form.password, form.full_name, form.phone, role);
