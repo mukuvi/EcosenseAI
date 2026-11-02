@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import { getItem, setItem, deleteItem } from '../services/storage';
 import api from '../services/api';
 
 const useAuthStore = create((set, get) => ({
@@ -8,8 +8,8 @@ const useAuthStore = create((set, get) => ({
   isLoading: true,
 
   init: async () => {
-    const token = await SecureStore.getItemAsync('ecosense_token');
-    const userJson = await SecureStore.getItemAsync('ecosense_user');
+    const token = await getItem('ecosense_token');
+    const userJson = await getItem('ecosense_user');
     if (token) {
       set({ token, user: userJson ? JSON.parse(userJson) : null });
       try {
@@ -22,32 +22,32 @@ const useAuthStore = create((set, get) => ({
 
   login: async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
-    await SecureStore.setItemAsync('ecosense_token', data.token);
-    await SecureStore.setItemAsync('ecosense_user', JSON.stringify(data.user));
+    await setItem('ecosense_token', data.token);
+    await setItem('ecosense_user', JSON.stringify(data.user));
     set({ user: data.user, token: data.token });
     return data;
   },
 
   register: async (email, password, full_name, phone, role) => {
     const { data } = await api.post('/auth/register', { email, password, full_name, phone, role });
-    await SecureStore.setItemAsync('ecosense_token', data.token);
-    await SecureStore.setItemAsync('ecosense_user', JSON.stringify(data.user));
+    await setItem('ecosense_token', data.token);
+    await setItem('ecosense_user', JSON.stringify(data.user));
     set({ user: data.user, token: data.token });
     return data;
   },
 
   refreshProfile: async () => {
-    const token = await SecureStore.getItemAsync('ecosense_token');
+    const token = await getItem('ecosense_token');
     if (!token) return null;
     const { data } = await api.get('/auth/me');
-    await SecureStore.setItemAsync('ecosense_user', JSON.stringify(data.user));
+    await setItem('ecosense_user', JSON.stringify(data.user));
     set({ user: data.user });
     return data.user;
   },
 
   logout: async () => {
-    await SecureStore.deleteItemAsync('ecosense_token');
-    await SecureStore.deleteItemAsync('ecosense_user');
+    await deleteItem('ecosense_token');
+    await deleteItem('ecosense_user');
     set({ user: null, token: null });
   },
 }));
