@@ -21,6 +21,16 @@ const config = {
     serviceUrl: process.env.AI_SERVICE_URL || 'http://localhost:8000',
   },
 
+  elevenlabs: {
+    apiKey: process.env.ELEVENLABS_API_KEY || '',
+    voiceId: process.env.ELEVENLABS_VOICE_ID || '21m00Tcm4TlvDq8ikWAM',
+    modelId: process.env.ELEVENLABS_MODEL_ID || 'eleven_multilingual_v2',
+  },
+
+  audio: {
+    cacheDir: process.env.AUDIO_CACHE_DIR || './.cache/audio',
+  },
+
   upload: {
     dir: process.env.UPLOAD_DIR || './uploads',
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE, 10) || 10 * 1024 * 1024,

@@ -1,27 +1,17 @@
-# Render blueprint for EcoSense AI.
-#
-# Deploy with: Dashboard -> New -> Blueprint -> pick this repo.
-# Render does not run docker-compose.yml, so each service is declared here
-# instead. Region: Frankfurt (closest to East Africa). Swap to oregon/ohio if
-# your users are elsewhere. Keep every service in the same region so the
-# internal URLs below resolve.
-
 databases:
   - name: ecosense-db
     databaseName: ecosense_ai
     user: ecosense
-    plan: free # free Postgres expires after 30 days; upgrade to basic-256mb for anything longer
+    plan: free
     region: frankfurt
     postgresMajorVersion: "16"
 
 services:
-  # Express API + photo uploads.
-  # Listens on the PORT Render injects (10000 by default), not 5000.
   - type: web
     name: ecosense-api
     runtime: docker
     region: frankfurt
-    plan: starter # 512 MB; bump to standard if sharp/photo traffic needs more
+    plan: starter
     rootDir: backend
     dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
@@ -53,25 +43,26 @@ services:
         generateValue: true
       - key: SEED_ADMIN_PASSWORD
         generateValue: true
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        value: 21m00Tcm4TlvDq8ikWAM
+      - key: ELEVENLABS_MODEL_ID
+        value: eleven_multilingual_v2
       - key: AI_SERVICE_URL
         value: http://ecosense-ai:10000
-      # Photos must live on the disk, not the container filesystem.
       - key: UPLOAD_DIR
         value: /app/uploads
-      # Seed demo data once after the first deploy with:
-      # Render Shell -> node src/db/seed.js
     disk:
       name: ecosense-uploads
       mountPath: /app/uploads
       sizeGB: 1
 
-  # FastAPI classifier / hotspot / routing service.
-  # Heuristic fallback only until you commit a model to ai/models/.
   - type: web
     name: ecosense-ai
     runtime: docker
     region: frankfurt
-    plan: starter # 512 MB is enough while no TensorFlow model is loaded
+    plan: starter
     rootDir: ai
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
@@ -79,9 +70,6 @@ services:
       - key: PYTHONUNBUFFERED
         value: "1"
 
-  # Static React dashboard, built by Vite and served by nginx.
-  # nginx also proxies /api and /uploads to the API service, so the browser
-  # talks to one origin and CORS stays out of the way.
   - type: web
     name: ecosense-web
     runtime: docker

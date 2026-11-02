@@ -2,6 +2,7 @@ const { validationResult } = require('express-validator');
 const db = require('../db');
 const config = require('../config');
 const logger = require('../utils/logger');
+const elevenlabs = require('../services/elevenlabs.service');
 exports.create = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -166,6 +167,10 @@ exports.getById = async (req, res, next) => {
       return res.status(404).json({ error: 'Report not found' });
     }
 
+    if (!canView(req.user, rows[0])) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
     res.json({ report: rows[0] });
   } catch (err) {
     next(err);
@@ -216,3 +221,41 @@ exports.updateStatus = async (req, res, next) => {
     next(err);
   }
 };
+exports.getAudio = async (req, res, next) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM waste_reports WHERE id = $1', [req.params.id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
+
+    const report = rows[0];
+
+    if (!canView(req.user, report)) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const { buffer, contentType } = await elevenlabs.synthesize(elevenlabs.buildNarration(report));
+
+    res.set({
+      'Content-Type': contentType,
+      'Content-Length': buffer.length,
+      'Cache-Control': 'private, max-age=3600',
+    });
+    res.send(buffer);
+  } catch (err) {
+    if (err.code === 'ELEVENLABS_NOT_CONFIGURED') {
+      return res.status(503).json({ error: 'Voice playback is not configured' });
+    }
+    if (err.code === 'ELEVENLABS_FAILED') {
+      return res.status(502).json({ error: 'Voice generation failed' });
+    }
+    next(err);
+  }
+};
+
+const STAFF_ROLES = ['admin', 'field_agent', 'organization'];
+
+function canView(user, report) {
+  return report.reporter_id === user.id || STAFF_ROLES.includes(user.role);
+}

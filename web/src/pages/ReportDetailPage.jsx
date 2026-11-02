@@ -7,6 +7,8 @@ export default function ReportDetailPage() {
   const { id } = useParams();
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [audioState, setAudioState] = useState('idle');
+  const [audioError, setAudioError] = useState('');
 
   useEffect(() => {
     api.get(`/reports/${id}`)
@@ -24,6 +26,25 @@ export default function ReportDetailPage() {
     }
   };
 
+  const handleListen = async () => {
+    setAudioError('');
+    setAudioState('loading');
+    try {
+      const { data } = await api.get(`/reports/${id}/audio`, { responseType: 'blob' });
+      const url = URL.createObjectURL(data);
+      const audio = new Audio(url);
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        setAudioState('idle');
+      };
+      await audio.play();
+      setAudioState('playing');
+    } catch (err) {
+      setAudioError(err.response?.status === 503 ? 'Voice playback is not configured' : 'Could not load audio');
+      setAudioState('idle');
+    }
+  };
+
   if (loading) return <p className="text-gray-400">Loading...</p>;
   if (!report) return <p className="text-red-500">Report not found</p>;
 
@@ -37,8 +58,19 @@ export default function ReportDetailPage() {
             <p className="text-sm text-gray-500">Report ID</p>
             <p className="font-mono text-sm">{report.id}</p>
           </div>
-          <StatusBadge status={report.status} />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleListen}
+              disabled={audioState === 'loading'}
+              className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50 transition disabled:opacity-30"
+            >
+              {audioState === 'loading' ? 'Loading audio...' : 'Listen to update'}
+            </button>
+            <StatusBadge status={report.status} />
+          </div>
         </div>
+
+        {audioError && <p className="text-sm text-red-500">{audioError}</p>}
 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>

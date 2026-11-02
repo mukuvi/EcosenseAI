@@ -49,6 +49,8 @@ router.get(
   reportController.list
 );
 
+router.get('/:id/audio', reportController.getAudio);
+
 router.get('/:id', reportController.getById);
 
 router.patch(
