@@ -20,7 +20,7 @@ function getApiBaseUrl() {
     return 'http://localhost:5000/api';
   }
 
-  return 'https://api.ecosense.co.ke/api';
+  return 'https://ecosense.tech/api';
 }
 
 const API_BASE_URL = getApiBaseUrl();

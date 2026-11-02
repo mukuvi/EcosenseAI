@@ -4,6 +4,9 @@ python-multipart==0.0.9
 Pillow==10.4.0
 numpy==1.26.4
 scikit-learn==1.5.2
-tensorflow==2.17.0
+joblib==1.4.2
+# CPU build on purpose: the default tensorflow wheel drags in multi-GB CUDA
+# packages, which blows up the image and the build time on Render.
+tensorflow-cpu==2.17.0
 scipy==1.14.1
 pydantic==2.9.2

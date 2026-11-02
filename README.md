@@ -82,6 +82,23 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Deploy on Render
+
+`render.yaml` is a Render Blueprint for the three app services plus Postgres. Render does not run `docker-compose.yml`, so each service is declared separately.
+
+1. Push this repo, then in Render choose **New → Blueprint** and pick the repo.
+2. Deploy. `ecosense-api` runs migrations automatically before each release; seed demo data once from the service shell with `node src/db/seed.js`.
+3. Attach a custom domain to `ecosense-web` (for example `ecosense.tech`) in **Settings → Custom Domains**. Point `api.ecosense.tech` at `ecosense-api` if you want a separate API hostname.
+4. Build the mobile app with `EXPO_PUBLIC_API_URL=https://<your-domain>/api` so it talks to the deployed API.
+
+Notes:
+
+- `ecosense-api` stores report photos on a 1 GB persistent disk mounted at `/app/uploads`. Container filesystems are ephemeral, so without the disk every deploy would delete the photos.
+- The free Postgres plan is deleted after 30 days. Move to a paid plan before then, or the data goes with it.
+- `ecosense-ai` ships without a trained model, so it serves the heuristic classifier in `ai/app/ml/waste_classifier.py`. Commit a model to `ai/models/` or set `WASTE_CLASSIFIER_MODEL_PATH` to use a real one; TensorFlow is only imported when a `.keras`/`.h5` file is found.
+- The dashboard is served by nginx (`web/Dockerfile.render`), which proxies `/api` and `/uploads` to the API service. One origin, no CORS setup, and relative API URLs keep working.
+- Local development is unchanged: `docker-compose up` still runs the Vite dev server through `web/Dockerfile`.
+
 ## Tech
 
 - Frontend: React, Expo React Native

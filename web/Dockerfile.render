@@ -1,0 +1,21 @@
+# Production image for Render (and any nginx host).
+# Build from web/:
+#   docker build -f Dockerfile.render -t ecosense-web .
+# The dashboard is built once and served as static files; nginx proxies
+# /api and /uploads to the API service so the browser only needs one origin.
+
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:1.27-alpine
+# Render injects PORT (10000 by default); 80 keeps plain `docker run` working.
+ENV PORT=80
+# Overridden in render.yaml with the API service's internal address.
+ENV BACKEND_URL=http://backend:5000
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
