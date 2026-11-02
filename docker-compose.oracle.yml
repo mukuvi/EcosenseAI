@@ -1,0 +1,102 @@
+name: ecosense
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ecosense_ai}
+      POSTGRES_USER: ${DB_USER:-ecosense}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ecosense} -d ${DB_NAME:-ecosense_ai}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    mem_limit: 192m
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-ecosense_ai}
+      DB_USER: ${DB_USER:-ecosense}
+      DB_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?set SEED_ADMIN_PASSWORD}
+      ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
+      ELEVENLABS_VOICE_ID: ${ELEVENLABS_VOICE_ID:-21m00Tcm4TlvDq8ikWAM}
+      ELEVENLABS_MODEL_ID: ${ELEVENLABS_MODEL_ID:-eleven_multilingual_v2}
+      AUDIO_CACHE_DIR: /app/.cache/audio
+      AI_SERVICE_URL: http://ai:8000
+      AI_TIMEOUT_MS: "15000"
+      UPLOAD_DIR: /app/uploads
+      GEOCODE_USER_AGENT: ${GEOCODE_USER_AGENT:-EcoSenseAI/1.0}
+    command: ["sh", "-c", "node src/db/migrate.js && node src/server.js"]
+    volumes:
+      - uploads:/app/uploads
+      - audio-cache:/app/.cache/audio
+    expose:
+      - "5000"
+    mem_limit: 224m
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/api/health').then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+
+  ai:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PORT: "8000"
+    expose:
+      - "8000"
+    mem_limit: 640m
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 20s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.render
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      PORT: "80"
+      BACKEND_URL: http://backend:5000
+    ports:
+      - "127.0.0.1:8088:80"
+    mem_limit: 96m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  pgdata:
+  uploads:
+  audio-cache:

@@ -5,6 +5,7 @@ const logger = require('../utils/logger');
 const elevenlabs = require('../services/elevenlabs.service');
 const aiService = require('../services/ai.service');
 const notificationService = require('../services/notification.service');
+const geocodeService = require('../services/geocode.service');
 exports.create = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -17,6 +18,7 @@ exports.create = async (req, res, next) => {
     const classification = req.files && req.files.length > 0
       ? await aiService.classifyImage(req.files[0])
       : null;
+    const resolvedAddress = address || (await geocodeService.reverse(latitude, longitude));
 
     const client = await db.getClient();
     try {
@@ -31,7 +33,7 @@ exports.create = async (req, res, next) => {
           req.user.id,
           latitude,
           longitude,
-          address || null,
+          resolvedAddress || null,
           description || null,
           waste_type || 'other',
           severity || 'medium',
@@ -182,6 +184,17 @@ exports.getById = async (req, res, next) => {
 
     if (!canView(req.user, rows[0])) {
       return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    if (!rows[0].address) {
+      const place = await geocodeService.reverse(rows[0].latitude, rows[0].longitude);
+      if (place) {
+        await db.query(
+          'UPDATE waste_reports SET address = $1, updated_at = NOW() WHERE id = $2',
+          [place, req.params.id]
+        );
+        rows[0].address = place;
+      }
     }
 
     const { rows: assignmentRows } = await db.query(

@@ -32,6 +32,12 @@ const config = {
     cacheDir: process.env.AUDIO_CACHE_DIR || './.cache/audio',
   },
 
+  geocode: {
+    url: process.env.GEOCODE_URL || 'https://nominatim.openstreetmap.org/reverse',
+    userAgent: process.env.GEOCODE_USER_AGENT || 'EcoSenseAI/1.0',
+    timeoutMs: parseInt(process.env.GEOCODE_TIMEOUT_MS, 10) || 8000,
+  },
+
   upload: {
     dir: process.env.UPLOAD_DIR || './uploads',
     maxFileSize: parseInt(process.env.MAX_FILE_SIZE, 10) || 10 * 1024 * 1024,
