@@ -6,7 +6,7 @@ A citizen sends a report with a photo and location. The platform classifies the 
 
 ## What it does
 
-- **Mobile app** (Expo, React Native): take a photo, add location, submit a report, follow its status history, receive notifications and earn rewards.
+- **Mobile app** (Expo, React Native): take a photo or choose one from the gallery, add location, submit a report, follow its status history, receive notifications and earn rewards.
 - **Web dashboard** (React): agencies see incoming reports, assign them to field agents, watch hotspot clusters on a live map and track cleanup progress.
 - **Backend API** (Node.js, Express, PostgreSQL): accounts, reports, assignments, status history, notifications, rewards and hotspots.
 - **AI service** (Python, FastAPI): a trained waste classifier plus hotspot detection and pickup route planning.
