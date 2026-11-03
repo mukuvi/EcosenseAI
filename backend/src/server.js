@@ -47,7 +47,12 @@ const uploadDir = path.resolve(config.upload.dir);
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
-app.use('/uploads', express.static(uploadDir));
+app.use('/uploads', express.static(uploadDir, {
+  dotfiles: 'deny',
+  fallthrough: false,
+  maxAge: '7d',
+  immutable: true,
+}));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'ecosense-ai', timestamp: new Date().toISOString() });

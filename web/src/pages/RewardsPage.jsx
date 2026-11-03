@@ -28,7 +28,7 @@ export default function RewardsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-2xl font-bold">Rewards</h2>
         <button
           onClick={() => setShowForm(!showForm)}

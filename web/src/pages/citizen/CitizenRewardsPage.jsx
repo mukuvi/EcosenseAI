@@ -31,7 +31,7 @@ export default function CitizenRewardsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold">Rewards</h2>
           <p className="text-gray-500 text-sm">Redeem your points for exciting rewards</p>

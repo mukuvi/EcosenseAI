@@ -159,8 +159,8 @@ export default function UsersPage() {
         </form>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[720px] text-left">
           <thead className="bg-gray-50 text-sm text-gray-500">
             <tr>
               <th className="px-6 py-3">Name</th>

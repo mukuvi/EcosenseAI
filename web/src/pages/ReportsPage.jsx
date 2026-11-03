@@ -29,7 +29,7 @@ export default function ReportsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-2xl font-bold">Waste Reports</h2>
         <select
           value={statusFilter}
@@ -46,8 +46,8 @@ export default function ReportsPage() {
         </select>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[720px] text-left">
           <thead className="bg-gray-50 text-sm text-gray-500">
             <tr>
               <th className="px-6 py-3">Reporter</th>

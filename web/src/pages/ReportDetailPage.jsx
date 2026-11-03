@@ -95,7 +95,7 @@ export default function ReportDetailPage() {
       <h2 className="text-2xl font-bold mb-6">Report Details</h2>
 
       <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm text-gray-500">Report ID</p>
             <p className="font-mono text-sm">{report.id}</p>
@@ -114,7 +114,7 @@ export default function ReportDetailPage() {
 
         {audioError && <p className="text-sm text-red-500">{audioError}</p>}
 
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="text-gray-500">Location</p>
             <p>{report.address || `${report.latitude}, ${report.longitude}`}</p>
@@ -161,7 +161,7 @@ export default function ReportDetailPage() {
                   key={i}
                   src={url}
                   alt={`Waste report ${i + 1}`}
-                  className="w-40 h-40 object-cover rounded-lg border"
+                  className="w-28 h-28 sm:w-40 sm:h-40 object-cover rounded-lg border"
                 />
               ))}
             </div>

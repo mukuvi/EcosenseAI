@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background, padding: 24 },
   error: { color: colors.danger, fontSize: 14, textAlign: 'center' },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  headerRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
   label: { fontSize: 12, color: colors.textMuted, textTransform: 'uppercase' },
   status: { fontSize: 20, fontWeight: '700', color: colors.primary600, textTransform: 'capitalize' },
   card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16 },

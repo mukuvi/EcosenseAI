@@ -45,8 +45,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface">
-      <div className="bg-white rounded-2xl shadow-sm p-8 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-surface px-4 py-8">
+      <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
           <p className="text-gray-500 mt-2">Choose your portal and create an account</p>

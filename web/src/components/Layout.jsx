@@ -54,6 +54,7 @@ export default function Layout() {
   const role = user?.role || 'citizen';
   const navItems = getNavItems(role);
   const [unread, setUnread] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const refreshUnread = () => {
@@ -79,10 +80,30 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-surface text-ink">
-      <aside className="w-64 bg-primary-800 text-white flex flex-col">
-        <div className="p-6">
-          <h1 className="text-xl font-bold">EcoSense AI</h1>
-          <p className="text-primary-200 text-sm mt-1">{roleLabels[role] || 'Dashboard'}</p>
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-primary-800 text-white flex flex-col transform transition-transform duration-200 lg:static lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="p-6 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold">EcoSense AI</h1>
+            <p className="text-primary-200 text-sm mt-1">{roleLabels[role] || 'Dashboard'}</p>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-2xl leading-none text-primary-200"
+            aria-label="Close menu"
+          >
+            x
+          </button>
         </div>
 
         <nav className="flex-1 px-4 space-y-1">
@@ -91,6 +112,7 @@ export default function Layout() {
               key={item.to}
               to={item.to}
               end={item.to === '/admin' || item.to === '/citizen' || item.to === '/agent' || item.to === '/org'}
+              onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                   isActive
@@ -124,9 +146,23 @@ export default function Layout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-8 bg-surface">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="lg:hidden flex items-center justify-between gap-3 bg-primary-800 text-white px-4 py-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="text-sm border border-primary-600 rounded-lg px-3 py-1.5"
+            aria-label="Open menu"
+          >
+            Menu
+          </button>
+          <p className="text-sm font-semibold truncate">{roleLabels[role] || 'Dashboard'}</p>
+          <span className="text-xs text-primary-200">{unread > 0 ? `${unread} new` : ''}</span>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-surface">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

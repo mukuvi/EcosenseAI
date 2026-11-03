@@ -23,11 +23,14 @@ A citizen sends a report with a photo and location. The platform classifies the 
 
 ```
 EcosenseAI/
-  ai/        FastAPI service: waste classification, hotspot and routing
-  backend/   Express API and PostgreSQL
-  mobile/    Expo React Native app
-  web/       React dashboard for agencies
-  docker-compose.yml
+  ai/                  FastAPI service: waste classification, hotspot and routing
+  backend/             Express API and PostgreSQL
+  deploy/oracle/       nginx configs and environment template for Oracle Cloud
+  mobile/              Expo React Native app
+  web/                 React dashboard for agencies
+  docker-compose.yml          local development
+  docker-compose.oracle.yml   single host production stack
+  render.yaml                 Render Blueprint
 ```
 
 ## Run it
@@ -169,6 +172,14 @@ sudo docker compose -f docker-compose.oracle.yml exec -T backend node src/db/see
 ```
 
 The web image binds to `127.0.0.1:8088`. Put the host nginx config from `deploy/oracle/` in front of it, point the domain at the VM, and issue a certificate with `certbot --nginx`. The live deployment uses `https://ecosense.mukuvi.tech`.
+
+## Security
+
+- No `.env`, private key, keystore or cloud credential is committed. The production `.env` lives on the server with `600` permissions.
+- Passwords are hashed with bcrypt cost 12. Login and registration are rate limited, CORS is restricted to the app origins, and uploads use random 128 bit filenames with fixed image extensions.
+- Report detail, report history and audio playback are limited to the reporter and staff roles. The full report list is available only to admins, field agents and organizations.
+- Change the seeded admin password after the first login. Set a real `ELEVENLABS_API_KEY` only in the server environment, never in the repository.
+- Run `npm audit --omit=dev` in each package before a release. Development-only tooling can report advisories that are not part of the shipped bundle.
 
 ## Tech
 

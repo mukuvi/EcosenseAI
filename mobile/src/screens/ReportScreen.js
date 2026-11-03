@@ -18,16 +18,33 @@ export default function ReportScreen({ navigation }) {
   const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const pickImage = async () => {
-    const result = Platform.OS === 'web'
-      ? await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-      })
-      : await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        quality: 0.8,
-      });
+  const takePhoto = async () => {
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
+    if (permission.status !== 'granted') {
+      return Alert.alert('Camera permission needed', 'Allow camera access to photograph the waste.');
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+    if (!result.canceled) {
+      setImages((prev) => [...prev, result.assets[0]]);
+    }
+  };
+
+  const choosePhoto = async () => {
+    if (Platform.OS !== 'web') {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permission.status !== 'granted') {
+        return Alert.alert('Photo permission needed', 'Allow photo access to attach a waste photo.');
+      }
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
     if (!result.canceled) {
       setImages((prev) => [...prev, result.assets[0]]);
     }
@@ -85,9 +102,16 @@ export default function ReportScreen({ navigation }) {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
-        <Text style={styles.cameraText}>{Platform.OS === 'web' ? '📷 Choose Photo' : '📸 Take Photo'}</Text>
-      </TouchableOpacity>
+      <View style={styles.photoRow}>
+        {Platform.OS !== 'web' && (
+          <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
+            <Text style={styles.cameraText}>📸 Take Photo</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity style={styles.galleryButton} onPress={choosePhoto}>
+          <Text style={styles.galleryText}>🖼️ Choose from Gallery</Text>
+        </TouchableOpacity>
+      </View>
 
       {images.length > 0 && (
         <ScrollView horizontal style={styles.imageRow}>
@@ -149,11 +173,17 @@ export default function ReportScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { padding: 20 },
+  photoRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   cameraButton: {
-    backgroundColor: '#fff', borderWidth: 2, borderColor: colors.primary600, borderStyle: 'dashed',
-    borderRadius: 12, paddingVertical: 32, alignItems: 'center', marginBottom: 16,
+    flex: 1, minWidth: 150, backgroundColor: '#fff', borderWidth: 2, borderColor: colors.primary600,
+    borderStyle: 'dashed', borderRadius: 12, paddingVertical: 24, alignItems: 'center',
   },
-  cameraText: { fontSize: 18, color: colors.primary600, fontWeight: '600' },
+  cameraText: { fontSize: 16, color: colors.primary600, fontWeight: '600' },
+  galleryButton: {
+    flex: 1, minWidth: 150, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border,
+    borderRadius: 12, paddingVertical: 24, alignItems: 'center', justifyContent: 'center',
+  },
+  galleryText: { fontSize: 15, color: colors.text, fontWeight: '600' },
   imageRow: { marginBottom: 16 },
   thumbnail: { width: 80, height: 80, borderRadius: 8, marginRight: 8 },
   locationButton: {

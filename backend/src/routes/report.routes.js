@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, query: queryValidator } = require('express-validator');
 const reportController = require('../controllers/report.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -38,6 +38,7 @@ router.post(
 
 router.get(
   '/',
+  authorize('admin', 'field_agent', 'organization'),
   [
     queryValidator('status').optional().isIn([
       'pending', 'verified', 'assigned', 'in_progress', 'resolved', 'rejected',

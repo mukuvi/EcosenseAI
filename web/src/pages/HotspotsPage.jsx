@@ -26,7 +26,7 @@ export default function HotspotsPage() {
       </p>
 
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <div className="h-96 rounded-lg overflow-hidden">
+        <div className="h-72 sm:h-96 rounded-lg overflow-hidden">
           <MapContainer center={NAIROBI} zoom={11} scrollWheelZoom>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -57,8 +57,8 @@ export default function HotspotsPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table className="w-full min-w-[720px] text-left">
           <thead className="bg-gray-50 text-sm text-gray-500">
             <tr>
               <th className="px-6 py-3">Location</th>
