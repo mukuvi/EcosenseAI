@@ -104,20 +104,18 @@ export default function LandingPage() {
     <div className="min-h-screen bg-surface">
       <header
         className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${
-          scrolled || menuOpen ? 'border-b border-line bg-surface/95 backdrop-blur' : 'bg-transparent'
+          scrolled || menuOpen ? 'border-b border-line bg-surface/95 backdrop-blur' : 'bg-surface/70 backdrop-blur'
         }`}
       >
         <div className="container flex h-16 items-center justify-between gap-4 lg:h-[72px]">
-          <Logo tone={scrolled || menuOpen ? 'dark' : 'light'} />
+          <Logo />
 
           <nav className="hidden items-center gap-7 lg:flex">
             {navigation.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={`text-[13px] font-medium transition-colors ${
-                  scrolled ? 'text-ink-muted hover:text-ink' : 'text-white/70 hover:text-white'
-                }`}
+                className="text-[13px] font-medium text-ink-muted transition-colors hover:text-ink"
               >
                 {item.label}
               </a>
@@ -126,12 +124,12 @@ export default function LandingPage() {
 
           <div className="hidden items-center gap-2 lg:flex">
             {dashboardLink ? (
-              <Button asChild variant={scrolled ? 'default' : 'light'} size="sm">
+              <Button asChild size="sm">
                 <Link to={dashboardLink}>Open dashboard</Link>
               </Button>
             ) : (
               <>
-                <Button asChild variant="ghost" size="sm" className={scrolled ? '' : 'text-white hover:bg-white/10 hover:text-white'}>
+                <Button asChild variant="ghost" size="sm">
                   <Link to="/login">Sign in</Link>
                 </Button>
                 <Button asChild variant="accent" size="sm">
@@ -148,9 +146,7 @@ export default function LandingPage() {
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className={`grid h-9 w-9 place-items-center rounded-md border lg:hidden ${
-              scrolled || menuOpen ? 'border-line text-ink' : 'border-white/20 text-white'
-            }`}
+            className="grid h-9 w-9 place-items-center rounded-md border border-line text-ink lg:hidden"
           >
             {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -197,7 +193,7 @@ export default function LandingPage() {
       </header>
 
       <main>
-        <section className="relative flex min-h-[640px] items-end overflow-hidden bg-forest-900 pb-12 pt-32 sm:min-h-[720px] lg:min-h-[88vh] lg:pb-16">
+        <section className="relative flex min-h-[640px] items-end overflow-hidden bg-bone pb-12 pt-32 sm:min-h-[720px] lg:min-h-[88vh] lg:pb-16">
           <video
             className="absolute inset-0 h-full w-full object-cover"
             src="/media/hero.mp4"
@@ -208,47 +204,42 @@ export default function LandingPage() {
             playsInline
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest-900 via-forest-900/45 to-forest-900/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-surface/25" />
 
           <div className="container relative z-10">
             <motion.div {...motionProps} className="max-w-3xl">
-              <h1 className="mt-6 font-display text-[clamp(2.9rem,7vw,5.6rem)] font-normal leading-[0.95] tracking-[-0.02em] text-white">
+              <h1 className="mt-6 font-display text-[clamp(2.9rem,7vw,5.6rem)] font-normal leading-[0.95] tracking-[-0.02em] text-ink">
                 Cleaner streets,
                 <br />
                 on the record.
               </h1>
-              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/70 sm:text-base">
+              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-muted sm:text-base">
                 EcoSense AI connects the people who spot waste with the teams responsible for clearing it. Every
                 report keeps its photo, its location and its history until the site is verified.
               </p>
 
               <div className="mt-9 flex flex-col gap-2.5 sm:flex-row">
-                <Button asChild size="lg" variant="accent">
+                <Button asChild size="lg">
                   <Link to={dashboardLink || '/register'}>
                     {dashboardLink ? 'Open your dashboard' : 'Report a site'}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-white/25 text-white hover:border-white/50 hover:bg-white/10"
-                >
+                <Button asChild size="lg" variant="outline">
                   <Link to={dashboardLink || '/login'}>Agency sign in</Link>
                 </Button>
               </div>
             </motion.div>
 
-            <div className="mt-14 grid grid-cols-1 gap-6 border-t border-white/15 pt-6 sm:grid-cols-3 sm:gap-8">
+            <div className="mt-14 grid grid-cols-1 gap-6 border-t border-ink/15 pt-6 sm:grid-cols-3 sm:gap-8">
               {[
                 ['Photo and location', 'attached to every report'],
                 ['Status history', 'visible to the reporter'],
                 ['Points', 'credited and redeemable'],
               ].map(([value, label]) => (
                 <div key={value}>
-                  <p className="text-sm font-medium text-white">{value}</p>
-                  <p className="mt-0.5 text-[13px] text-white/50">{label}</p>
+                  <p className="text-sm font-medium text-ink">{value}</p>
+                  <p className="mt-0.5 text-[13px] text-ink-muted">{label}</p>
                 </div>
               ))}
             </div>
@@ -397,26 +388,21 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="bg-forest-900 text-white">
+        <section className="border-t border-line bg-bone">
           <div className="container flex flex-col items-start justify-between gap-8 py-16 sm:flex-row sm:items-end sm:py-20">
             <div>
               <h2 className="max-w-lg font-display text-[clamp(2rem,4vw,3.1rem)] font-normal leading-[1.02]">
                 Start with the street outside your door.
               </h2>
-              <p className="mt-4 max-w-md text-sm leading-relaxed text-white/60">
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-ink-muted">
                 Create an account, report one site and follow it until it is closed.
               </p>
             </div>
             <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
-              <Button asChild variant="accent" size="lg">
+              <Button asChild size="lg">
                 <Link to={dashboardLink || '/register'}>Create an account</Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-white/25 text-white hover:border-white/50 hover:bg-white/10"
-              >
+              <Button asChild size="lg" variant="outline">
                 <Link to={dashboardLink || '/login'}>Sign in</Link>
               </Button>
             </div>

@@ -11,9 +11,9 @@ const notes = [
 export default function AuthShell({ title, subtitle, children, footer, eyebrow }) {
   return (
     <div className="min-h-screen bg-surface lg:grid lg:grid-cols-[1.05fr_0.95fr]">
-      <aside className="relative hidden overflow-hidden bg-forest-900 p-12 lg:flex lg:flex-col xl:p-16">
+      <aside className="relative hidden overflow-hidden bg-bone p-12 lg:flex lg:flex-col xl:p-16">
         <video
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover opacity-90"
           src="/media/hero.mp4"
           poster="/media/hero-poster.jpg"
           autoPlay
@@ -22,29 +22,29 @@ export default function AuthShell({ title, subtitle, children, footer, eyebrow }
           playsInline
           aria-hidden="true"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-forest-900 via-forest-900/55 to-forest-900/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bone via-bone/70 to-bone/20" />
 
         <div className="relative z-10">
-          <Logo tone="light" />
+          <Logo />
         </div>
 
         <div className="relative z-10 mt-auto max-w-md">
-          <h2 className="mt-5 font-display text-[clamp(1.9rem,2.8vw,2.6rem)] font-normal leading-[1.05] text-white">
+          <h2 className="mt-5 font-display text-[clamp(1.9rem,2.8vw,2.6rem)] font-normal leading-[1.05] text-ink">
             Every report has a record, a team and an outcome.
           </h2>
 
-          <dl className="mt-9 space-y-4 border-t border-white/15 pt-6">
+          <dl className="mt-9 space-y-4 border-t border-ink/15 pt-6">
             {notes.map(([index, note]) => (
               <div key={index} className="flex gap-4">
-                <dt className="tabular text-[13px] text-white/40">{index}</dt>
-                <dd className="text-[13px] leading-relaxed text-white/70">{note}</dd>
+                <dt className="tabular text-[13px] text-ink/40">{index}</dt>
+                <dd className="text-[13px] leading-relaxed text-ink-muted">{note}</dd>
               </div>
             ))}
           </dl>
 
           <Link
             to="/"
-            className="mt-9 inline-block text-[13px] text-white/50 underline-offset-4 transition hover:text-white hover:underline"
+            className="mt-9 inline-block text-[13px] text-ink-muted underline-offset-4 transition hover:text-ink hover:underline"
           >
             Back to the home page
           </Link>
