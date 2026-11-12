@@ -218,13 +218,13 @@ export default function LandingPage() {
       </header>
 
       <main>
-        <section className="relative flex min-h-[640px] items-end overflow-hidden bg-bone pb-12 pt-32 sm:min-h-[720px] lg:min-h-[88vh] lg:pb-16">
+        <section className="relative flex min-h-[560px] items-end overflow-hidden bg-bone pb-10 pt-28 sm:min-h-[700px] sm:pb-12 sm:pt-32 lg:min-h-[88vh] lg:pb-16">
           <img
             className="absolute inset-0 h-full w-full object-cover animate-kenburns"
-            src="/media/hero-nairobi.jpg"
-            alt="Koinange Street in Nairobi"
+            src="/media/hero-nairobi-city.jpg"
+            alt="Nairobi city skyline"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/75 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/85 to-surface/35 sm:bg-gradient-to-r sm:from-surface sm:via-surface/75 sm:to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
 
           <div className="container relative z-10">
@@ -236,18 +236,18 @@ export default function LandingPage() {
             >
               <motion.h1
                 variants={item}
-                className="mt-6 font-display text-[clamp(2.9rem,7vw,5.6rem)] font-normal leading-[0.95] tracking-[-0.02em] text-ink"
+                className="mt-5 font-display text-[clamp(2.4rem,6.4vw,5.4rem)] font-normal leading-[0.98] tracking-[-0.02em] text-ink sm:mt-6"
               >
                 Cleaner streets,
                 <br />
                 on the record.
               </motion.h1>
-              <motion.p variants={item} className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-muted sm:text-base">
+              <motion.p variants={item} className="mt-4 max-w-xl text-[14px] leading-relaxed text-ink-muted sm:mt-6 sm:text-[15px] lg:text-base">
                 EcoSense AI connects the people who spot waste with the teams responsible for clearing it. Every
                 report keeps its photo, its location and its history until the site is verified.
               </motion.p>
 
-              <motion.div variants={item} className="mt-9 flex flex-col gap-2.5 sm:flex-row">
+              <motion.div variants={item} className="mt-7 flex flex-col gap-2.5 sm:mt-9 sm:flex-row">
                 <Button asChild size="lg">
                   <Link to={dashboardLink || '/register'}>
                     {dashboardLink ? 'Open your dashboard' : 'Report a site'}
@@ -264,7 +264,7 @@ export default function LandingPage() {
               initial={reduced ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
-              className="mt-14 grid grid-cols-1 gap-6 border-t border-ink/15 pt-6 sm:grid-cols-3 sm:gap-8"
+              className="mt-10 grid grid-cols-3 gap-4 border-t border-ink/15 pt-5 sm:mt-14 sm:gap-8 sm:pt-6"
             >
               {[
                 ['Photo and location', 'attached to every report'],
@@ -272,8 +272,8 @@ export default function LandingPage() {
                 ['Points', 'credited and redeemable'],
               ].map(([value, label]) => (
                 <div key={value}>
-                  <p className="text-sm font-medium text-ink">{value}</p>
-                  <p className="mt-0.5 text-[13px] text-ink-muted">{label}</p>
+                  <p className="text-[12px] font-medium text-ink sm:text-sm">{value}</p>
+                  <p className="mt-0.5 text-[11px] leading-snug text-ink-muted sm:text-[13px]">{label}</p>
                 </div>
               ))}
             </motion.div>
@@ -461,18 +461,6 @@ export default function LandingPage() {
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-muted">
               Waste reporting and cleanup operations. Report a site, assign a team, verify the cleanup and keep the
               record.
-            </p>
-            <p className="mt-3 text-[11px] leading-relaxed text-ink-muted">
-              Photo:{' '}
-              <a
-                href="https://commons.wikimedia.org/wiki/File:Koinange_Street,_2025_(01).jpg"
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-2"
-              >
-                Koinange Street, Nairobi
-              </a>{' '}
-              by Bahnfrend, CC BY-SA 4.0
             </p>
           </div>
 

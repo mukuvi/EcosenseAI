@@ -22,10 +22,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom', 'react-router-dom'],
-          motion: ['framer-motion'],
-          charts: ['recharts'],
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+          if (id.includes('react-router') || id.includes('react-dom') || id.includes('/react/')) return 'react';
+          if (id.includes('framer-motion')) return 'motion';
+          if (id.includes('recharts')) return 'charts';
+          return undefined;
         },
       },
     },

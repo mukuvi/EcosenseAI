@@ -14,7 +14,7 @@ export default function AuthShell({ title, subtitle, children, footer, eyebrow }
       <aside className="relative hidden overflow-hidden bg-bone p-12 lg:flex lg:flex-col xl:p-16">
         <img
           className="absolute inset-0 h-full w-full object-cover opacity-90"
-          src="/media/hero-nairobi.jpg"
+          src="/media/hero-nairobi-city.jpg"
           alt=""
           aria-hidden="true"
         />

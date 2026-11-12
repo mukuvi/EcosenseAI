@@ -1,8 +1,15 @@
 require('dotenv').config();
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
+if (nodeEnv === 'production') {
+  if (!process.env.JWT_SECRET) throw new Error('JWT_SECRET must be set in production');
+  if (!process.env.DB_PASSWORD) throw new Error('DB_PASSWORD must be set in production');
+}
+
 const config = {
   port: parseInt(process.env.PORT, 10) || 5000,
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
 
   db: {
     host: process.env.DB_HOST || 'localhost',

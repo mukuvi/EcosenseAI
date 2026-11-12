@@ -8,8 +8,7 @@
     "dev": "nodemon src/server.js",
     "migrate": "node src/db/migrate.js",
     "seed": "node src/db/seed.js",
-    "geocode": "node src/scripts/geocode-reports.js",
-    "test": "jest --coverage"
+    "geocode": "node src/scripts/geocode-reports.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -24,12 +23,10 @@
     "pg": "^8.13.0",
     "winston": "^3.14.0"
   },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.1.4",
-    "supertest": "^6.3.4"
-  },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "overrides": {
+    "qs": "^6.17.1"
   }
 }
