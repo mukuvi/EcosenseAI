@@ -38,3 +38,6 @@ ai/models/*.pkl
 .idea/
 *.swp
 *.swo
+
+# Local Android release build artefacts (APK, keystore, passwords)
+EcoSenseBuild/

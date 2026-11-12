@@ -56,6 +56,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      VITE_PROXY_TARGET: http://backend:5000
     depends_on:
       - backend
     volumes:

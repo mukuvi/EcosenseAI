@@ -117,8 +117,8 @@ export default function UsersPage() {
               value={createPassword}
               onChange={(e) => setCreatePassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Min. 6 characters"
-              minLength={6}
+              placeholder="Min. 8 characters, letters and numbers"
+              minLength={8}
               required
             />
           </div>

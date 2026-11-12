@@ -18,9 +18,16 @@ router.post(
   '/',
   authorize('admin'),
   [
-    body('title').trim().notEmpty(),
-    body('points_cost').isInt({ min: 1 }),
-    body('quantity_available').isInt({ min: 0 }),
+    body('title')
+      .trim()
+      .notEmpty()
+      .withMessage('Reward title is required'),
+    body('points_cost')
+      .isInt({ min: 1 })
+      .withMessage('Points cost must be a whole number of 1 or more'),
+    body('quantity_available')
+      .isInt({ min: 0 })
+      .withMessage('Quantity available must be a whole number of 0 or more'),
   ],
   rewardController.create
 );

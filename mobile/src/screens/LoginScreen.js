@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
+import { getApiErrorMessage } from '../services/apiError';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ export default function LoginScreen({ navigation }) {
     try {
       await login(email, password);
     } catch (err) {
-      Alert.alert('Login Failed', err.response?.data?.error || 'Something went wrong');
+      Alert.alert('Login Failed', getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }

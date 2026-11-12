@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
+import { parseApiError } from '../utils/apiError';
 
 const roleLanding = {
   admin: '/admin',
@@ -26,7 +27,7 @@ export default function LoginPage() {
       const role = data.user.role;
       navigate(roleLanding[role] || '/citizen');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(parseApiError(err, 'We could not sign you in. Please try again.').message);
     } finally {
       setLoading(false);
     }
@@ -38,9 +39,6 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
-          <span className="inline-block mt-3 px-3 py-1 rounded-full bg-sage-50 text-ink border border-sage-200 text-xs font-medium">
-            Ready for production
-          </span>
         </div>
 
         {error && (

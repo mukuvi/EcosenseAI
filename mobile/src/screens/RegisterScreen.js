@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
+import { getApiErrorMessage } from '../services/apiError';
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
@@ -20,7 +21,7 @@ export default function RegisterScreen({ navigation }) {
     try {
       await register(form.email, form.password, form.full_name, form.phone, role);
     } catch (err) {
-      Alert.alert('Registration Failed', err.response?.data?.error || 'Something went wrong');
+      Alert.alert('Registration Failed', getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
