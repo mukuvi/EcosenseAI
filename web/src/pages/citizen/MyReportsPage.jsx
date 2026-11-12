@@ -1,17 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight, Camera, FileText } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../../services/api';
+import PageHeader from '../../components/PageHeader';
+import Pagination from '../../components/Pagination';
 import StatusBadge from '../../components/StatusBadge';
+import EmptyState from '../../components/EmptyState';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+import { Select } from '../../components/ui/select';
+import { Skeleton } from '../../components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+
+const statuses = [
+  { value: '', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'assigned', label: 'Assigned' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'rejected', label: 'Rejected' },
+];
 
 export default function MyReportsPage() {
   const [reports, setReports] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [loading, setLoading] = useState(true);
   const limit = 20;
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
         const params = { page, limit };
         if (statusFilter) params.status = statusFilter;
@@ -19,106 +41,111 @@ export default function MyReportsPage() {
         setReports(data.reports);
         setTotal(data.total);
       } catch (err) {
-        console.error('Failed to fetch reports', err);
+        toast.error('Could not load your reports');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchReports();
-  }, [page, statusFilter]);
 
-  const totalPages = Math.ceil(total / limit);
+    load();
+  }, [page, statusFilter]);
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-2xl font-bold">My Reports</h2>
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={statusFilter}
-            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-          >
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="verified">Verified</option>
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <Link
-            to="/citizen/report/new"
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm"
-          >
-            + New Report
+      <PageHeader
+        title="My reports"
+        description="Everything you have reported, with the current stage of each cleanup."
+      >
+        <Select
+          value={statusFilter}
+          onChange={(event) => {
+            setStatusFilter(event.target.value);
+            setPage(1);
+          }}
+          className="w-44"
+          aria-label="Filter by status"
+        >
+          {statuses.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
+        </Select>
+        <Button asChild>
+          <Link to="/citizen/report/new">
+            <Camera className="h-4 w-4" />
+            New report
           </Link>
-        </div>
-      </div>
+        </Button>
+      </PageHeader>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th className="px-6 py-3">Type</th>
-              <th className="px-6 py-3">Location</th>
-              <th className="px-6 py-3">Severity</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Points</th>
-              <th className="px-6 py-3">Date</th>
-              <th className="px-6 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {reports.map((report) => (
-              <tr key={report.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-sm capitalize">{report.waste_type}</td>
-                <td className="px-6 py-4 text-sm text-gray-500 truncate max-w-[200px]">
-                  {report.address || `${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}`}
-                </td>
-                <td className="px-6 py-4 text-sm capitalize">{report.severity}</td>
-                <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
-                <td className="px-6 py-4 text-sm text-primary-600 font-medium">+{report.points_awarded}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(report.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
-                  <Link to={`/citizen/reports/${report.id}`} className="text-primary-600 hover:underline text-sm">
-                    View
-                  </Link>
-                </td>
-              </tr>
+      <Card className="overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-12" />
             ))}
-            {reports.length === 0 && (
-              <tr>
-                <td colSpan="7" className="px-6 py-12 text-center text-gray-400">
-                  No reports found. <Link to="/citizen/report/new" className="text-primary-600 hover:underline">Submit your first report</Link>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        ) : reports.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="No reports here yet"
+            description="Submit your first report and it will appear in this list with its status."
+            action={
+              <Button asChild>
+                <Link to="/citizen/report/new">Report waste</Link>
+              </Button>
+            }
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Type</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Severity</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Points</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reports.map((report) => (
+                <TableRow key={report.id}>
+                  <TableCell className="font-medium capitalize">{report.waste_type}</TableCell>
+                  <TableCell className="max-w-[220px] truncate text-ink-muted">
+                    {report.address || `${report.latitude?.toFixed(4)}, ${report.longitude?.toFixed(4)}`}
+                  </TableCell>
+                  <TableCell className="capitalize text-ink-muted">{report.severity}</TableCell>
+                  <TableCell>
+                    <StatusBadge status={report.status} />
+                  </TableCell>
+                  <TableCell className="font-medium text-primary-700">+{report.points_awarded}</TableCell>
+                  <TableCell className="text-ink-muted">
+                    {new Date(report.created_at).toLocaleDateString(undefined, {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link
+                      to={`/citizen/reports/${report.id}`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-800"
+                    >
+                      Open
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={Math.ceil(total / limit)} onChange={setPage} />
     </div>
   );
 }

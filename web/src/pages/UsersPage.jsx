@@ -1,232 +1,353 @@
 import { useEffect, useState } from 'react';
+import { Ban, CheckCircle2, Loader2, Plus, ShieldCheck, UserPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../services/api';
+import PageHeader from '../components/PageHeader';
+import Pagination from '../components/Pagination';
+import EmptyState from '../components/EmptyState';
+import { Button } from '../components/ui/button';
+import { Card } from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select } from '../components/ui/select';
+import { Skeleton } from '../components/ui/skeleton';
+import { Badge } from '../components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import { parseApiError } from '../utils/apiError';
+
+const roles = [
+  { value: 'citizen', label: 'Citizen' },
+  { value: 'organization', label: 'Organization' },
+  { value: 'field_agent', label: 'Field agent' },
+  { value: 'admin', label: 'Administrator' },
+];
+
+const emptyForm = {
+  full_name: '',
+  email: '',
+  password: '',
+  phone: '',
+  role: 'citizen',
+};
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [createEmail, setCreateEmail] = useState('');
-  const [createPassword, setCreatePassword] = useState('');
-  const [createFullName, setCreateFullName] = useState('');
-  const [createPhone, setCreatePhone] = useState('');
-  const [createRole, setCreateRole] = useState('citizen');
-  const [createError, setCreateError] = useState('');
-  const [createLoading, setCreateLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [creating, setCreating] = useState(false);
+  const [busyUser, setBusyUser] = useState('');
   const limit = 20;
 
+  const loadUsers = () =>
+    api
+      .get('/users', { params: { page, limit } })
+      .then(({ data }) => {
+        setUsers(data.users);
+        setTotal(data.total);
+      })
+      .catch(() => toast.error('Could not load users'))
+      .finally(() => setLoading(false));
+
   useEffect(() => {
-    api.get('/users', { params: { page, limit } })
-      .then(({ data }) => { setUsers(data.users); setTotal(data.total); })
-      .catch(console.error);
+    setLoading(true);
+    loadUsers();
   }, [page]);
 
-  const handleCreateUser = async (e) => {
-    e.preventDefault();
-    setCreateError('');
-    setCreateLoading(true);
+  const handleCreate = async (event) => {
+    event.preventDefault();
+    setFieldErrors({});
+    setCreating(true);
+
     try {
       const { data } = await api.post('/users', {
-        email: createEmail,
-        password: createPassword,
-        full_name: createFullName,
-        phone: createPhone || undefined,
-        role: createRole,
+        email: form.email,
+        password: form.password,
+        full_name: form.full_name,
+        phone: form.phone || undefined,
+        role: form.role,
       });
 
-      setUsers((prev) => [data.user, ...prev].slice(0, limit));
-      setTotal((t) => t + 1);
-
-      setCreateEmail('');
-      setCreatePassword('');
-      setCreateFullName('');
-      setCreatePhone('');
-      setCreateRole('citizen');
+      setUsers((previous) => [data.user, ...previous].slice(0, limit));
+      setTotal((value) => value + 1);
+      setForm(emptyForm);
+      setOpen(false);
+      toast.success(`${data.user.full_name} can now sign in`);
     } catch (err) {
-      setCreateError(err.response?.data?.error || err.response?.data?.errors?.[0]?.msg || 'Failed to create user');
+      const parsed = parseApiError(err, 'Could not create this user');
+      setFieldErrors(parsed.fieldErrors);
+      toast.error(parsed.message);
     } finally {
-      setCreateLoading(false);
+      setCreating(false);
     }
   };
 
-  const handleRoleChange = async (userId, newRole) => {
+  const handleRoleChange = async (userId, role) => {
+    setBusyUser(userId);
     try {
-      const { data } = await api.patch(`/users/${userId}/role`, { role: newRole });
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: data.user.role } : u)));
+      const { data } = await api.patch(`/users/${userId}/role`, { role });
+      setUsers((previous) => previous.map((user) => (user.id === userId ? { ...user, role: data.user.role } : user)));
+      toast.success('Role updated');
     } catch (err) {
-      console.error('Failed to update role', err);
+      toast.error(err.response?.data?.error || 'Could not update the role');
+    } finally {
+      setBusyUser('');
     }
   };
 
   const handleToggleActive = async (userId, nextActive) => {
+    setBusyUser(userId);
     try {
       const { data } = await api.patch(`/users/${userId}/active`, { is_active: nextActive });
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: data.user.is_active } : u)));
+      setUsers((previous) =>
+        previous.map((user) => (user.id === userId ? { ...user, is_active: data.user.is_active } : user))
+      );
+      toast.success(nextActive ? 'Account restored' : 'Account suspended');
     } catch (err) {
-      console.error('Failed to update user status', err);
+      toast.error(err.response?.data?.error || 'Could not update this account');
+    } finally {
+      setBusyUser('');
     }
   };
 
-  const handleDelete = async (userId) => {
+  const handleDeactivate = async (userId) => {
+    setBusyUser(userId);
     try {
       const { data } = await api.delete(`/users/${userId}`);
-      setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, is_active: data.user.is_active } : u)));
+      setUsers((previous) =>
+        previous.map((user) => (user.id === userId ? { ...user, is_active: data.user.is_active } : user))
+      );
+      toast.success('Account deactivated');
     } catch (err) {
-      console.error('Failed to delete user', err);
+      toast.error(err.response?.data?.error || 'Could not deactivate this account');
+    } finally {
+      setBusyUser('');
     }
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Users</h2>
+      <PageHeader
+        title="People"
+        description="Manage the citizens, field agents and organizations using EcoSense AI."
+      >
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4" />
+              New user
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>Create a user</DialogTitle>
+            <DialogDescription>
+              The person can sign in immediately with this email and password.
+            </DialogDescription>
 
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-        <h3 className="font-semibold text-lg mb-4">Create User</h3>
+            <form onSubmit={handleCreate} className="mt-5 space-y-4" noValidate>
+              <div className="space-y-2">
+                <Label htmlFor="new_name">Full name</Label>
+                <Input
+                  id="new_name"
+                  value={form.full_name}
+                  onChange={(event) => setForm({ ...form, full_name: event.target.value })}
+                  invalid={Boolean(fieldErrors.full_name)}
+                  placeholder="Amina Hassan"
+                  required
+                />
+                {fieldErrors.full_name && <p className="text-[13px] text-red-600">{fieldErrors.full_name}</p>}
+              </div>
 
-        {createError && (
-          <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">{createError}</div>
-        )}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="new_email">Email</Label>
+                  <Input
+                    id="new_email"
+                    type="email"
+                    value={form.email}
+                    onChange={(event) => setForm({ ...form, email: event.target.value })}
+                    invalid={Boolean(fieldErrors.email)}
+                    placeholder="amina@example.com"
+                    required
+                  />
+                  {fieldErrors.email && <p className="text-[13px] text-red-600">{fieldErrors.email}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new_phone">Phone</Label>
+                  <Input
+                    id="new_phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(event) => setForm({ ...form, phone: event.target.value })}
+                    invalid={Boolean(fieldErrors.phone)}
+                    placeholder="+254712345678"
+                  />
+                  {fieldErrors.phone && <p className="text-[13px] text-red-600">{fieldErrors.phone}</p>}
+                </div>
+              </div>
 
-        <form onSubmit={handleCreateUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input
-              value={createFullName}
-              onChange={(e) => setCreateFullName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Organization Admin"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={createEmail}
-              onChange={(e) => setCreateEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="user@example.com"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={createPassword}
-              onChange={(e) => setCreatePassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Min. 8 characters, letters and numbers"
-              minLength={8}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone (optional)</label>
-            <input
-              value={createPhone}
-              onChange={(e) => setCreatePhone(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="+254700000000"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              value={createRole}
-              onChange={(e) => setCreateRole(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            >
-              <option value="citizen">Citizen</option>
-              <option value="organization">Organization</option>
-              <option value="field_agent">Field Agent</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={createLoading}
-              className="w-full md:w-auto px-5 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-50"
-            >
-              {createLoading ? 'Creating...' : 'Create'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th className="px-6 py-3">Name</th>
-              <th className="px-6 py-3">Email</th>
-              <th className="px-6 py-3">Role</th>
-              <th className="px-6 py-3">Points</th>
-              <th className="px-6 py-3">Joined</th>
-              <th className="px-6 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-sm font-medium">{user.full_name}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">{user.email}</td>
-                <td className="px-6 py-4">
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                    className="text-sm border rounded px-2 py-1"
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="new_password">Password</Label>
+                  <Input
+                    id="new_password"
+                    type="password"
+                    value={form.password}
+                    onChange={(event) => setForm({ ...form, password: event.target.value })}
+                    invalid={Boolean(fieldErrors.password)}
+                    placeholder="At least 8 characters"
+                    required
+                  />
+                  {fieldErrors.password && <p className="text-[13px] text-red-600">{fieldErrors.password}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new_role">Role</Label>
+                  <Select
+                    id="new_role"
+                    value={form.role}
+                    onChange={(event) => setForm({ ...form, role: event.target.value })}
                   >
-                    <option value="citizen">Citizen</option>
-                    <option value="organization">Organization</option>
-                    <option value="field_agent">Field Agent</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </td>
-                <td className="px-6 py-4 text-sm">{user.points_balance}</td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(user.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <span className={`inline-block w-2 h-2 rounded-full mr-1 ${user.is_active ? 'bg-moss-600' : 'bg-sage-300'}`}></span>
-                  {user.is_active ? 'Active' : 'Inactive'}
-                </td>
-                <td className="px-6 py-4 text-sm">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(user.id, !user.is_active)}
-                      className="px-3 py-1 rounded-lg border text-ink hover:bg-surface transition"
-                    >
-                      {user.is_active ? 'Block' : 'Unblock'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(user.id)}
-                      className="px-3 py-1 rounded-lg border border-sage-300 text-ink hover:bg-sage-50 transition"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    {roles.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
 
-      {Math.ceil(total / limit) > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-lg border disabled:opacity-50">Previous</button>
-          <span className="px-4 py-2 text-sm text-gray-500">Page {page} of {Math.ceil(total / limit)}</span>
-          <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / limit)} className="px-4 py-2 rounded-lg border disabled:opacity-50">Next</button>
-        </div>
-      )}
+              <Button type="submit" className="w-full" disabled={creating}>
+                {creating && <Loader2 className="h-4 w-4 animate-spin" />}
+                {creating ? 'Creating' : 'Create user'}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </PageHeader>
+
+      <Card className="overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-12" />
+            ))}
+          </div>
+        ) : users.length === 0 ? (
+          <EmptyState
+            icon={UserPlus}
+            title="No users yet"
+            description="Create the first account and it will appear here."
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Person</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Points</TableHead>
+                <TableHead>Joined</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary-50 text-xs font-semibold text-primary-700">
+                        {user.full_name
+                          .split(' ')
+                          .filter(Boolean)
+                          .slice(0, 2)
+                          .map((part) => part[0])
+                          .join('')
+                          .toUpperCase()}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{user.full_name}</p>
+                        <p className="truncate text-xs text-ink-muted">{user.email}</p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={user.role}
+                      onChange={(event) => handleRoleChange(user.id, event.target.value)}
+                      disabled={busyUser === user.id}
+                      className="h-9 w-36 text-[13px]"
+                      aria-label={`Role for ${user.full_name}`}
+                    >
+                      {roles.map((role) => (
+                        <option key={role.value} value={role.value}>
+                          {role.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </TableCell>
+                  <TableCell className="font-medium">{user.points_balance}</TableCell>
+                  <TableCell className="text-ink-muted">
+                    {new Date(user.created_at).toLocaleDateString(undefined, {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    {user.is_active ? (
+                      <Badge variant="success">
+                        <CheckCircle2 className="h-3 w-3" />
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="neutral">
+                        <Ban className="h-3 w-3" />
+                        Suspended
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleToggleActive(user.id, !user.is_active)}
+                        disabled={busyUser === user.id}
+                      >
+                        {user.is_active ? 'Suspend' : 'Restore'}
+                      </Button>
+                      {user.is_active && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeactivate(user.id)}
+                          disabled={busyUser === user.id}
+                          className="text-red-600 hover:bg-red-50"
+                        >
+                          <ShieldCheck className="h-3.5 w-3.5" />
+                          Deactivate
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+
+      <Pagination page={page} totalPages={Math.ceil(total / limit)} onChange={setPage} />
     </div>
   );
 }

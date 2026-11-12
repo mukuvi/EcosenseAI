@@ -41,3 +41,6 @@ ai/models/*.pkl
 
 # Local Android release build artefacts (APK, keystore, passwords)
 EcoSenseBuild/
+
+# Large release binaries served locally, not committed
+web/public/downloads/

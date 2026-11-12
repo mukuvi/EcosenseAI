@@ -1,17 +1,38 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight, ClipboardList } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../services/api';
+import PageHeader from '../components/PageHeader';
+import Pagination from '../components/Pagination';
 import StatusBadge from '../components/StatusBadge';
+import EmptyState from '../components/EmptyState';
+import { Card } from '../components/ui/card';
+import { Select } from '../components/ui/select';
+import { Skeleton } from '../components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
+
+const statuses = [
+  { value: '', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'assigned', label: 'Assigned' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'rejected', label: 'Rejected' },
+];
 
 export default function ReportsPage() {
   const [reports, setReports] = useState([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [loading, setLoading] = useState(true);
   const limit = 20;
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
         const params = { page, limit };
         if (statusFilter) params.status = statusFilter;
@@ -19,92 +40,98 @@ export default function ReportsPage() {
         setReports(data.reports);
         setTotal(data.total);
       } catch (err) {
-        console.error('Failed to fetch reports', err);
+        toast.error('Could not load reports');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchReports();
+
+    load();
   }, [page, statusFilter]);
 
   const totalPages = Math.ceil(total / limit);
 
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-2xl font-bold">Waste Reports</h2>
-        <select
+      <PageHeader
+        title="Waste reports"
+        description={`${total} report${total === 1 ? '' : 's'} in the queue. Filter by status to focus the work.`}
+      >
+        <Select
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="px-4 py-2 border border-gray-300 rounded-lg"
+          onChange={(event) => {
+            setStatusFilter(event.target.value);
+            setPage(1);
+          }}
+          className="w-44"
+          aria-label="Filter by status"
         >
-          <option value="">All statuses</option>
-          <option value="pending">Pending</option>
-          <option value="verified">Verified</option>
-          <option value="assigned">Assigned</option>
-          <option value="in_progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="rejected">Rejected</option>
-        </select>
-      </div>
+          {statuses.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
+        </Select>
+      </PageHeader>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th className="px-6 py-3">Reporter</th>
-              <th className="px-6 py-3">Type</th>
-              <th className="px-6 py-3">Severity</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Date</th>
-              <th className="px-6 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {reports.map((report) => (
-              <tr key={report.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-sm">{report.reporter_name}</td>
-                <td className="px-6 py-4 text-sm capitalize">{report.waste_type}</td>
-                <td className="px-6 py-4 text-sm capitalize">{report.severity}</td>
-                <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(report.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
-                  <Link to={`${report.id}`} className="text-primary-600 hover:underline text-sm">
-                    View
-                  </Link>
-                </td>
-              </tr>
+      <Card className="overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-12" />
             ))}
-            {reports.length === 0 && (
-              <tr>
-                <td colSpan="6" className="px-6 py-12 text-center text-gray-400">No reports found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </div>
+        ) : reports.length === 0 ? (
+          <EmptyState
+            icon={ClipboardList}
+            title="No reports match this filter"
+            description="Try another status, or wait for new reports to arrive."
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Reporter</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Severity</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reports.map((report) => (
+                <TableRow key={report.id}>
+                  <TableCell className="font-medium">{report.reporter_name}</TableCell>
+                  <TableCell className="capitalize text-ink-muted">{report.waste_type}</TableCell>
+                  <TableCell className="capitalize text-ink-muted">{report.severity}</TableCell>
+                  <TableCell>
+                    <StatusBadge status={report.status} />
+                  </TableCell>
+                  <TableCell className="text-ink-muted">
+                    {new Date(report.created_at).toLocaleDateString(undefined, {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link
+                      to={report.id}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-800"
+                    >
+                      Open
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Pagination page={page} totalPages={totalPages} onChange={setPage} />
     </div>
   );
 }

@@ -1,35 +1,38 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Building2, Eye, EyeOff, HardHat, Loader2, ShieldCheck, User } from 'lucide-react';
+import { toast } from 'sonner';
 import useAuthStore from '../store/authStore';
 import { parseApiError } from '../utils/apiError';
+import AuthShell from '../components/AuthShell';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { cn } from '../lib/utils';
 
-const ROLE_OPTIONS = [
-  { value: 'citizen', label: 'Citizen' },
-  { value: 'organization', label: 'Organization' },
-  { value: 'field_agent', label: 'Field Agent' },
-  { value: 'admin', label: 'Admin' },
+const roleOptions = [
+  { value: 'citizen', label: 'Citizen', hint: 'Report waste and earn points', icon: User },
+  { value: 'organization', label: 'Organization', hint: 'Coordinate cleanups in your area', icon: Building2 },
+  { value: 'field_agent', label: 'Field agent', hint: 'Work assigned reports', icon: HardHat },
+  { value: 'admin', label: 'Administrator', hint: 'Created by an admin', icon: ShieldCheck, restricted: true },
 ];
-
-const inputClass = (invalid) =>
-  `w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${
-    invalid ? 'border-red-500' : 'border-gray-300'
-  }`;
 
 function FieldError({ message }) {
   if (!message) return null;
-  return <p className="mt-1 text-sm text-red-600">{message}</p>;
+  return <p className="text-[13px] text-red-600">{message}</p>;
 }
 
 export default function RegisterPage() {
-  const [selectedRole, setSelectedRole] = useState('citizen');
+  const [role, setRole] = useState('citizen');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const register = useAuthStore((s) => s.register);
+  const register = useAuthStore((state) => state.register);
   const navigate = useNavigate();
 
   const clearFieldError = (field) =>
@@ -40,153 +43,175 @@ export default function RegisterPage() {
       return next;
     });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setFieldErrors({});
-
-    if (selectedRole === 'admin') {
-      setError('Admin accounts are created by an administrator. Choose a different portal or sign in if you already have access.');
+  const selectRole = (option) => {
+    if (option.restricted) {
+      toast.info('Administrator accounts are created by an existing administrator.');
       return;
     }
+    setRole(option.value);
+    setError('');
+  };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setFieldErrors({});
     setLoading(true);
+
     try {
-      const data = await register(email, password, fullName, phone || undefined, selectedRole);
-      const role = data.user.role;
-      if (role === 'admin') navigate('/admin');
-      else if (role === 'field_agent') navigate('/agent');
-      else if (role === 'organization') navigate('/org');
-      else navigate('/citizen');
+      const data = await register(email, password, fullName, phone || undefined, role);
+      toast.success('Your account is ready');
+      const landing = {
+        admin: '/admin',
+        field_agent: '/agent',
+        organization: '/org',
+        citizen: '/citizen',
+      };
+      navigate(landing[data.user.role] || '/citizen');
     } catch (err) {
       const parsed = parseApiError(err, 'We could not create your account. Please try again.');
       setFieldErrors(parsed.fieldErrors);
       setError(parsed.message);
+      toast.error(parsed.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface px-4 py-8">
-      <div className="bg-white rounded-2xl shadow-sm p-6 sm:p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary-700">EcoSense AI</h1>
-          <p className="text-gray-500 mt-2">Choose your portal and create an account</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 mb-5">
-          {ROLE_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setSelectedRole(opt.value)}
-              className={
-                `px-3 py-2 rounded-lg text-sm border transition ` +
-                (selectedRole === opt.value
-                  ? 'bg-primary-600 text-white border-primary-600'
-                  : 'bg-surface text-ink border-sage-200 hover:border-primary-300')
-              }
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-
-        {selectedRole === 'admin' && (
-          <div className="bg-sage-50 text-ink border border-sage-200 px-4 py-3 rounded-lg mb-4 text-sm">
-            Admin accounts are created by an administrator.
-            <span className="block mt-1">If you already have an account, sign in instead.</span>
-          </div>
-        )}
-
-        {error && (
-          <div role="alert" className="bg-red-50 text-red-700 border border-red-200 px-4 py-3 rounded-lg mb-4 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-            <input
-              type="text"
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                clearFieldError('full_name');
-              }}
-              aria-invalid={Boolean(fieldErrors.full_name)}
-              className={inputClass(fieldErrors.full_name)}
-              placeholder="John Doe"
-              required
-            />
-            <FieldError message={fieldErrors.full_name} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                clearFieldError('email');
-              }}
-              aria-invalid={Boolean(fieldErrors.email)}
-              className={inputClass(fieldErrors.email)}
-              placeholder="you@example.com"
-              required
-            />
-            <FieldError message={fieldErrors.email} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                clearFieldError('password');
-              }}
-              aria-invalid={Boolean(fieldErrors.password)}
-              className={inputClass(fieldErrors.password)}
-              placeholder="Min. 8 characters, letters and numbers"
-              minLength={8}
-              required
-            />
-            <FieldError message={fieldErrors.password} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone (optional)</label>
-            <input
-              type="tel"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                clearFieldError('phone');
-              }}
-              aria-invalid={Boolean(fieldErrors.phone)}
-              className={inputClass(fieldErrors.phone)}
-              placeholder="+254700000000"
-            />
-            <FieldError message={fieldErrors.phone} />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition disabled:opacity-50"
-          >
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
+    <AuthShell
+      eyebrow="New account"
+      title="Create your account"
+      subtitle="Select the role that matches your work. Citizens can report sites immediately; agency accounts are created by an administrator or organization."
+      footer={
+        <>
           Already have an account?{' '}
-          <Link to="/login" className="text-primary-600 hover:underline font-medium">
+          <Link to="/login" className="font-medium text-primary-700 underline-offset-4 hover:underline">
             Sign in
           </Link>
-        </p>
+        </>
+      }
+    >
+      <div className="grid grid-cols-2 gap-2.5">
+        {roleOptions.map((option) => {
+          const selected = role === option.value && !option.restricted;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => selectRole(option)}
+              aria-pressed={selected}
+              className={cn(
+                'rounded-xl border p-3 text-left transition',
+                selected
+                  ? 'border-primary-500 bg-primary-50 shadow-[0_0_0_1px_rgba(46,139,87,0.35)]'
+                  : 'border-ink/12 bg-white hover:border-ink/25',
+                option.restricted && 'opacity-60'
+              )}
+            >
+              <option.icon className={cn('h-4 w-4', selected ? 'text-primary-700' : 'text-ink/45')} />
+              <p className="mt-2 text-[13px] font-semibold leading-tight">{option.label}</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-ink-muted">{option.hint}</p>
+            </button>
+          );
+        })}
       </div>
-    </div>
+
+      {error && (
+        <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+        <div className="space-y-2">
+          <Label htmlFor="full_name">Full name</Label>
+          <Input
+            id="full_name"
+            value={fullName}
+            onChange={(event) => {
+              setFullName(event.target.value);
+              clearFieldError('full_name');
+            }}
+            invalid={Boolean(fieldErrors.full_name)}
+            placeholder="Jane Wanjiku"
+            autoComplete="name"
+            required
+          />
+          <FieldError message={fieldErrors.full_name} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              clearFieldError('email');
+            }}
+            invalid={Boolean(fieldErrors.email)}
+            placeholder="you@example.com"
+            autoComplete="email"
+            required
+          />
+          <FieldError message={fieldErrors.email} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                clearFieldError('password');
+              }}
+              invalid={Boolean(fieldErrors.password)}
+              placeholder="At least 8 characters, with a number"
+              autoComplete="new-password"
+              className="pr-11"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-1.5 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-ink/45 transition hover:bg-ink/5 hover:text-ink"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+          <FieldError message={fieldErrors.password} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone">
+            Phone <span className="font-normal text-ink-muted">(optional)</span>
+          </Label>
+          <Input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(event) => {
+              setPhone(event.target.value);
+              clearFieldError('phone');
+            }}
+            invalid={Boolean(fieldErrors.phone)}
+            placeholder="+254712345678"
+            autoComplete="tel"
+          />
+          <FieldError message={fieldErrors.phone} />
+        </div>
+
+        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {loading ? 'Creating account' : 'Create account'}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

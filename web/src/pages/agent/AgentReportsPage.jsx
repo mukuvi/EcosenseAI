@@ -1,7 +1,34 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight, ClipboardList, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '../../services/api';
+import PageHeader from '../../components/PageHeader';
+import Pagination from '../../components/Pagination';
 import StatusBadge from '../../components/StatusBadge';
+import EmptyState from '../../components/EmptyState';
+import { Button } from '../../components/ui/button';
+import { Card } from '../../components/ui/card';
+import { Select } from '../../components/ui/select';
+import { Skeleton } from '../../components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
+import { cn } from '../../lib/utils';
+
+const statuses = [
+  { value: '', label: 'All statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'assigned', label: 'Assigned' },
+  { value: 'in_progress', label: 'In progress' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'rejected', label: 'Rejected' },
+];
+
+const nextAction = {
+  verified: { label: 'Assign', status: 'assigned' },
+  assigned: { label: 'Start', status: 'in_progress' },
+  in_progress: { label: 'Resolve', status: 'resolved' },
+};
 
 export default function AgentReportsPage() {
   const [reports, setReports] = useState([]);
@@ -9,10 +36,13 @@ export default function AgentReportsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [scope, setScope] = useState('mine');
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState('');
   const limit = 20;
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
         if (scope === 'mine') {
           const { data } = await api.get('/reports/assigned');
@@ -27,150 +57,162 @@ export default function AgentReportsPage() {
         setReports(data.reports);
         setTotal(data.total);
       } catch (err) {
-        console.error('Failed to fetch reports', err);
+        toast.error('Could not load reports');
+      } finally {
+        setLoading(false);
       }
     };
-    fetchReports();
+
+    load();
   }, [page, statusFilter, scope]);
 
-  const handleStatusChange = async (reportId, newStatus) => {
+  const handleStatusChange = async (reportId, status) => {
+    setBusy(reportId);
     try {
-      const { data } = await api.patch(`/reports/${reportId}/status`, { status: newStatus });
-      if (scope === 'mine' && newStatus === 'resolved') {
-        setReports((prev) => prev.filter((r) => r.id !== reportId));
-        setTotal((t) => Math.max(0, t - 1));
-        return;
+      const { data } = await api.patch(`/reports/${reportId}/status`, { status });
+
+      if (scope === 'mine' && status === 'resolved') {
+        setReports((previous) => previous.filter((report) => report.id !== reportId));
+        setTotal((value) => Math.max(0, value - 1));
+      } else {
+        setReports((previous) =>
+          previous.map((report) => (report.id === reportId ? { ...report, ...data.report } : report))
+        );
       }
-      setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, ...data.report } : r)));
+
+      toast.success(`Report moved to ${status.replace('_', ' ')}`);
     } catch (err) {
-      console.error('Failed to update status', err);
+      toast.error(err.response?.data?.error || 'Could not update the status');
+    } finally {
+      setBusy('');
     }
   };
 
-  const totalPages = Math.ceil(total / limit);
-
   return (
     <div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-2xl font-bold">Waste Reports</h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+      <PageHeader
+        title="Reports"
+        description="Start, progress and close the jobs assigned to you."
+      >
+        <div className="inline-flex rounded-xl border border-ink/15 bg-white p-1">
+          {[
+            { value: 'mine', label: 'Assigned to me' },
+            { value: 'all', label: 'All reports' },
+          ].map((option) => (
             <button
-              onClick={() => { setScope('mine'); setPage(1); }}
-              className={`px-3 py-2 text-sm ${scope === 'mine' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
+              key={option.value}
+              type="button"
+              onClick={() => {
+                setScope(option.value);
+                setPage(1);
+              }}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-[13px] font-medium transition',
+                scope === option.value ? 'bg-primary-600 text-white' : 'text-ink-muted hover:text-ink'
+              )}
             >
-              Assigned to me
+              {option.label}
             </button>
-            <button
-              onClick={() => { setScope('all'); setPage(1); }}
-              className={`px-3 py-2 text-sm ${scope === 'all' ? 'bg-primary-600 text-white' : 'bg-white text-gray-600'}`}
-            >
-              All reports
-            </button>
-          </div>
-          {scope === 'all' && (
-            <select
-              value={statusFilter}
-              onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
-            >
-              <option value="">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
-              <option value="assigned">Assigned</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          )}
+          ))}
         </div>
-      </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-gray-50 text-sm text-gray-500">
-            <tr>
-              <th className="px-6 py-3">Reporter</th>
-              <th className="px-6 py-3">Type</th>
-              <th className="px-6 py-3">Severity</th>
-              <th className="px-6 py-3">Status</th>
-              <th className="px-6 py-3">Date</th>
-              <th className="px-6 py-3">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {reports.map((report) => (
-              <tr key={report.id} className="hover:bg-gray-50 transition">
-                <td className="px-6 py-4 text-sm">{report.reporter_name}</td>
-                <td className="px-6 py-4 text-sm capitalize">{report.waste_type}</td>
-                <td className="px-6 py-4 text-sm capitalize">{report.severity}</td>
-                <td className="px-6 py-4"><StatusBadge status={report.status} /></td>
-                <td className="px-6 py-4 text-sm text-gray-500">
-                  {new Date(report.created_at).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <Link to={`/agent/reports/${report.id}`} className="text-primary-600 hover:underline text-sm">
-                      View
-                    </Link>
-                    {report.status === 'verified' && (
-                      <button
-                        onClick={() => handleStatusChange(report.id, 'assigned')}
-                        className="text-xs px-2 py-1 bg-sage-50 text-ink border border-sage-200 rounded hover:bg-sage-100"
-                      >
-                        Assign
-                      </button>
-                    )}
-                    {report.status === 'assigned' && (
-                      <button
-                        onClick={() => handleStatusChange(report.id, 'in_progress')}
-                        className="text-xs px-2 py-1 bg-primary-50 text-primary-800 border border-primary-200 rounded hover:bg-primary-100"
-                      >
-                        Start
-                      </button>
-                    )}
-                    {report.status === 'in_progress' && (
-                      <button
-                        onClick={() => handleStatusChange(report.id, 'resolved')}
-                        className="text-xs px-2 py-1 bg-moss-50 text-ink border border-moss-200 rounded hover:bg-moss-100"
-                      >
-                        Resolve
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
+        {scope === 'all' && (
+          <Select
+            value={statusFilter}
+            onChange={(event) => {
+              setStatusFilter(event.target.value);
+              setPage(1);
+            }}
+            className="w-44"
+            aria-label="Filter by status"
+          >
+            {statuses.map((status) => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
             ))}
-            {reports.length === 0 && (
-              <tr>
-                <td colSpan="6" className="px-6 py-12 text-center text-gray-400">No reports found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </Select>
+        )}
+      </PageHeader>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-6">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2 text-sm text-gray-500">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 rounded-lg border disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
+      <Card className="overflow-hidden">
+        {loading ? (
+          <div className="space-y-3 p-5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <Skeleton key={index} className="h-12" />
+            ))}
+          </div>
+        ) : reports.length === 0 ? (
+          <EmptyState
+            icon={ClipboardList}
+            title={scope === 'mine' ? 'No jobs assigned to you' : 'No reports match this filter'}
+            description={
+              scope === 'mine'
+                ? 'When an agency assigns a report to you, it will appear here.'
+                : 'Try another status to see more reports.'
+            }
+          />
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead>Reporter</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Severity</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reports.map((report) => {
+                const action = nextAction[report.status];
+                return (
+                  <TableRow key={report.id}>
+                    <TableCell className="font-medium">{report.reporter_name}</TableCell>
+                    <TableCell className="capitalize text-ink-muted">{report.waste_type}</TableCell>
+                    <TableCell className="capitalize text-ink-muted">{report.severity}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={report.status} />
+                    </TableCell>
+                    <TableCell className="text-ink-muted">
+                      {new Date(report.created_at).toLocaleDateString(undefined, {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-2">
+                        {action && (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => handleStatusChange(report.id, action.status)}
+                            disabled={busy === report.id}
+                          >
+                            {busy === report.id && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                            {action.label}
+                          </Button>
+                        )}
+                        <Link
+                          to={`/agent/reports/${report.id}`}
+                          className="inline-flex items-center gap-1 text-sm font-medium text-primary-700 hover:text-primary-800"
+                        >
+                          Open
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </Card>
+
+      {scope === 'all' && <Pagination page={page} totalPages={Math.ceil(total / limit)} onChange={setPage} />}
     </div>
   );
 }
