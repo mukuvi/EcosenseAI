@@ -56,7 +56,7 @@ export default function RegisterScreen({ navigation }) {
 
         <View style={styles.form}>
           <Label>Full name</Label>
-          <Field placeholder="Jane Wanjiku" value={form.full_name} onChangeText={update('full_name')} autoComplete="name" />
+          <Field placeholder="Mukuvi Ngandu" value={form.full_name} onChangeText={update('full_name')} autoComplete="name" />
 
           <Label style={{ marginTop: 16 }}>Email</Label>
           <Field

@@ -134,7 +134,7 @@ export default function RegisterPage() {
               clearFieldError('full_name');
             }}
             invalid={Boolean(fieldErrors.full_name)}
-            placeholder="Jane Wanjiku"
+            placeholder="Mukuvi Ngandu"
             autoComplete="name"
             required
           />

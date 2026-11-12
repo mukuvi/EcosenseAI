@@ -162,7 +162,7 @@ export default function UsersPage() {
                   value={form.full_name}
                   onChange={(event) => setForm({ ...form, full_name: event.target.value })}
                   invalid={Boolean(fieldErrors.full_name)}
-                  placeholder="Amina Hassan"
+                  placeholder="Mukuvi Ngandu"
                   required
                 />
                 {fieldErrors.full_name && <p className="text-[13px] text-red-600">{fieldErrors.full_name}</p>}
