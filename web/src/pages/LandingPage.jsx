@@ -74,6 +74,34 @@ const rewardsRows = [
   ['Reward redeemed', 'Subject to availability'],
 ];
 
+function Reveal({ children, delay = 0, className }) {
+  const reduced = useReducedMotion();
+
+  if (reduced) return <div className={className}>{children}</div>;
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-70px' }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] } },
+};
+
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -96,9 +124,6 @@ export default function LandingPage() {
   }, [menuOpen]);
 
   const dashboardLink = token ? roleLanding[user?.role] || '/citizen' : null;
-  const motionProps = reduced
-    ? {}
-    : { initial: { opacity: 0, y: 18 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } };
 
   return (
     <div className="min-h-screen bg-surface">
@@ -194,31 +219,35 @@ export default function LandingPage() {
 
       <main>
         <section className="relative flex min-h-[640px] items-end overflow-hidden bg-bone pb-12 pt-32 sm:min-h-[720px] lg:min-h-[88vh] lg:pb-16">
-          <video
-            className="absolute inset-0 h-full w-full object-cover"
-            src="/media/hero.mp4"
-            poster="/media/hero-poster.jpg"
-            autoPlay
-            loop
-            muted
-            playsInline
-            aria-hidden="true"
+          <img
+            className="absolute inset-0 h-full w-full object-cover animate-kenburns"
+            src="/media/hero-nairobi.jpg"
+            alt="Koinange Street in Nairobi"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-surface/25" />
+          <div className="absolute inset-0 bg-gradient-to-r from-surface via-surface/75 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
 
           <div className="container relative z-10">
-            <motion.div {...motionProps} className="max-w-3xl">
-              <h1 className="mt-6 font-display text-[clamp(2.9rem,7vw,5.6rem)] font-normal leading-[0.95] tracking-[-0.02em] text-ink">
+            <motion.div
+              variants={stagger}
+              initial={reduced ? false : 'hidden'}
+              animate="show"
+              className="max-w-3xl"
+            >
+              <motion.h1
+                variants={item}
+                className="mt-6 font-display text-[clamp(2.9rem,7vw,5.6rem)] font-normal leading-[0.95] tracking-[-0.02em] text-ink"
+              >
                 Cleaner streets,
                 <br />
                 on the record.
-              </h1>
-              <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-muted sm:text-base">
+              </motion.h1>
+              <motion.p variants={item} className="mt-6 max-w-xl text-[15px] leading-relaxed text-ink-muted sm:text-base">
                 EcoSense AI connects the people who spot waste with the teams responsible for clearing it. Every
                 report keeps its photo, its location and its history until the site is verified.
-              </p>
+              </motion.p>
 
-              <div className="mt-9 flex flex-col gap-2.5 sm:flex-row">
+              <motion.div variants={item} className="mt-9 flex flex-col gap-2.5 sm:flex-row">
                 <Button asChild size="lg">
                   <Link to={dashboardLink || '/register'}>
                     {dashboardLink ? 'Open your dashboard' : 'Report a site'}
@@ -228,10 +257,15 @@ export default function LandingPage() {
                 <Button asChild size="lg" variant="outline">
                   <Link to={dashboardLink || '/login'}>Agency sign in</Link>
                 </Button>
-              </div>
+              </motion.div>
             </motion.div>
 
-            <div className="mt-14 grid grid-cols-1 gap-6 border-t border-ink/15 pt-6 sm:grid-cols-3 sm:gap-8">
+            <motion.div
+              initial={reduced ? false : { opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+              className="mt-14 grid grid-cols-1 gap-6 border-t border-ink/15 pt-6 sm:grid-cols-3 sm:gap-8"
+            >
               {[
                 ['Photo and location', 'attached to every report'],
                 ['Status history', 'visible to the reporter'],
@@ -242,14 +276,16 @@ export default function LandingPage() {
                   <p className="mt-0.5 text-[13px] text-ink-muted">{label}</p>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
         <section className="border-b border-line">
           <div className="container grid gap-8 py-16 sm:grid-cols-[240px_1fr] sm:py-20">
-            <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-muted">The gap</p>
-            <div>
+            <Reveal>
+              <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-muted">The gap</p>
+            </Reveal>
+            <Reveal delay={0.08}>
               <h2 className="max-w-3xl font-display text-[clamp(1.75rem,3.4vw,2.75rem)] font-normal leading-[1.1] tracking-[-0.01em]">
                 Waste is reported in minutes and cleared in weeks. The delay is coordination, not effort.
               </h2>
@@ -263,31 +299,35 @@ export default function LandingPage() {
                   progress. Agencies can prove it.
                 </p>
               </div>
-            </div>
+            </Reveal>
           </div>
         </section>
 
         <section id="process" className="scroll-mt-20 border-b border-line">
           <div className="container py-16 sm:py-20">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <Reveal className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <h2 className="max-w-xl text-[clamp(1.6rem,3vw,2.25rem)] font-semibold leading-tight tracking-tight">
                 From a photo to a verified cleanup
               </h2>
               <p className="max-w-sm text-sm leading-relaxed text-ink-muted">
                 Three stages, one record. Nothing is re-created in a spreadsheet or lost in a chat thread.
               </p>
-            </div>
+            </Reveal>
 
             <div className="mt-12 divide-y divide-line border-t border-line">
-              {process.map((item) => (
-                <div key={item.step} className="grid gap-3 py-7 sm:grid-cols-[80px_1fr_180px] sm:gap-8">
-                  <p className="tabular text-sm text-ink-muted">{item.step}</p>
+              {process.map((entry, index) => (
+                <Reveal
+                  key={entry.step}
+                  delay={index * 0.08}
+                  className="grid gap-3 py-7 sm:grid-cols-[80px_1fr_180px] sm:gap-8"
+                >
+                  <p className="tabular text-sm text-ink-muted">{entry.step}</p>
                   <div>
-                    <h3 className="text-lg font-medium">{item.title}</h3>
-                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{item.body}</p>
+                    <h3 className="text-lg font-medium">{entry.title}</h3>
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-muted">{entry.body}</p>
                   </div>
-                  <p className="text-[13px] text-ink-muted sm:text-right">{item.meta}</p>
-                </div>
+                  <p className="text-[13px] text-ink-muted sm:text-right">{entry.meta}</p>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -296,7 +336,7 @@ export default function LandingPage() {
         <section id="platform" className="scroll-mt-20 border-b border-line">
           <div className="container py-16 sm:py-20">
             <div className="grid gap-10 lg:grid-cols-[1fr_1.35fr] lg:gap-16">
-              <div>
+              <Reveal>
                 <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-muted">Platform</p>
                 <h2 className="mt-5 text-[clamp(1.6rem,3vw,2.25rem)] font-semibold leading-tight tracking-tight">
                   Built for the work after the report
@@ -305,14 +345,18 @@ export default function LandingPage() {
                   The platform covers triage, assignment, field updates and verification, with a shared record for
                   citizens, agents, organizations and administrators.
                 </p>
-              </div>
+              </Reveal>
 
               <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
-                {capabilities.map((item) => (
-                  <div key={item.title} className="border-t border-line pt-4">
-                    <h3 className="text-[15px] font-medium">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{item.body}</p>
-                  </div>
+                {capabilities.map((capability, index) => (
+                  <Reveal
+                    key={capability.title}
+                    delay={(index % 2) * 0.08}
+                    className="border-t border-line pt-4"
+                  >
+                    <h3 className="text-[15px] font-medium">{capability.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">{capability.body}</p>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -321,7 +365,7 @@ export default function LandingPage() {
 
         <section id="agencies" className="scroll-mt-20 border-b border-line bg-bone">
           <div className="container grid gap-10 py-16 sm:py-20 lg:grid-cols-2 lg:items-center lg:gap-16">
-            <div>
+            <Reveal>
               <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-muted">For agencies</p>
               <h2 className="mt-5 text-[clamp(1.6rem,3vw,2.25rem)] font-semibold leading-tight tracking-tight">
                 An operations view, not a complaints inbox
@@ -348,22 +392,22 @@ export default function LandingPage() {
               <Button asChild className="mt-8">
                 <Link to="/login">Open the agency dashboard</Link>
               </Button>
-            </div>
+            </Reveal>
 
-            <div className="overflow-hidden rounded-xl border border-line bg-white p-2">
+            <Reveal delay={0.1} className="overflow-hidden rounded-xl border border-line bg-white p-2">
               <img
                 src="/media/dashboard.png"
                 alt="EcoSense AI operations dashboard showing report metrics and waste type breakdown"
                 className="w-full rounded-lg border border-line"
                 loading="lazy"
               />
-            </div>
+            </Reveal>
           </div>
         </section>
 
         <section id="rewards" className="scroll-mt-20 border-b border-line">
           <div className="container grid gap-10 py-16 sm:py-20 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
-            <div>
+            <Reveal>
               <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-ink-muted">Rewards</p>
               <h2 className="mt-5 text-[clamp(1.6rem,3vw,2.25rem)] font-semibold leading-tight tracking-tight">
                 Points that follow the work
@@ -375,16 +419,16 @@ export default function LandingPage() {
               <Button asChild variant="outline" className="mt-8">
                 <Link to="/register">Create a citizen account</Link>
               </Button>
-            </div>
+            </Reveal>
 
-            <div className="divide-y divide-line border-y border-line">
+            <Reveal delay={0.1} className="divide-y divide-line border-y border-line">
               {rewardsRows.map(([label, note]) => (
                 <div key={label} className="flex items-baseline justify-between gap-6 py-5">
                   <p className="text-[15px] font-medium">{label}</p>
                   <p className="max-w-[220px] text-right text-[13px] text-ink-muted">{note}</p>
                 </div>
               ))}
-            </div>
+            </Reveal>
           </div>
         </section>
 
@@ -417,6 +461,18 @@ export default function LandingPage() {
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-ink-muted">
               Waste reporting and cleanup operations. Report a site, assign a team, verify the cleanup and keep the
               record.
+            </p>
+            <p className="mt-3 text-[11px] leading-relaxed text-ink-muted">
+              Photo:{' '}
+              <a
+                href="https://commons.wikimedia.org/wiki/File:Koinange_Street,_2025_(01).jpg"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
+                Koinange Street, Nairobi
+              </a>{' '}
+              by Bahnfrend, CC BY-SA 4.0
             </p>
           </div>
 

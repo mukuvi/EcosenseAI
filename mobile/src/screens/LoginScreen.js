@@ -1,87 +1,165 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
 import { getApiErrorMessage } from '../services/apiError';
+import { Button, Field, Label, Screen, fonts } from '../components/ui';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const login = useAuthStore((s) => s.login);
+  const login = useAuthStore((state) => state.login);
 
   const handleLogin = async () => {
-    if (!email || !password) return Alert.alert('Error', 'Please fill in all fields');
+    if (!email || !password) return Alert.alert('Missing details', 'Enter your email and password.');
     setLoading(true);
     try {
       await login(email, password);
     } catch (err) {
-      Alert.alert('Login Failed', getApiErrorMessage(err));
+      Alert.alert('Sign in failed', getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <View style={styles.inner}>
-        <Text style={styles.logo}>🌍</Text>
-        <Text style={styles.title}>EcoSense AI</Text>
-        <Text style={styles.subtitle}>Report waste. Earn rewards. Save Kenya.</Text>
+    <Screen style={styles.screen}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.brand}>
+          <View style={styles.mark}>
+            <FeatherMark />
+          </View>
+          <Text style={styles.wordmark}>EcoSense AI</Text>
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <Text style={styles.title}>Sign in</Text>
+        <Text style={styles.subtitle}>
+          Report a site, follow its status and collect points when the cleanup is verified.
+        </Text>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Signing in...' : 'Sign In'}</Text>
-        </TouchableOpacity>
+        <View style={styles.form}>
+          <Label>Email</Label>
+          <Field
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.link}>Don't have an account? <Text style={styles.linkBold}>Register</Text></Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+          <Label style={{ marginTop: 16 }}>Password</Label>
+          <Field
+            placeholder="Your password"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <Button
+            label={loading ? 'Signing in' : 'Sign in'}
+            loading={loading}
+            onPress={handleLogin}
+            style={{ marginTop: 24 }}
+          />
+        </View>
+
+        <Pressable onPress={() => navigation.navigate('Register')} style={styles.linkRow}>
+          <Text style={styles.link}>New here? </Text>
+          <Text style={styles.linkStrong}>Create an account</Text>
+        </Pressable>
+      </KeyboardAvoidingView>
+    </Screen>
+  );
+}
+
+function FeatherMark() {
+  return (
+    <View style={styles.leafWrap}>
+      <View style={styles.leaf} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  inner: { flex: 1, justifyContent: 'center', paddingHorizontal: 32 },
-  logo: { fontSize: 64, textAlign: 'center' },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary600, marginTop: 8 },
-  subtitle: { fontSize: 14, textAlign: 'center', color: colors.textMuted, marginBottom: 32 },
-  input: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 12,
+  screen: {
+    backgroundColor: colors.background,
   },
-  button: {
-    backgroundColor: colors.primary600,
-    borderRadius: 12,
-    paddingVertical: 16,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    maxWidth: 460,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  brand: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 16,
+    gap: 10,
+    marginBottom: 40,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { textAlign: 'center', color: colors.textMuted, fontSize: 14 },
-  linkBold: { color: colors.primary600, fontWeight: '600' },
+  mark: {
+    width: 30,
+    height: 30,
+    borderRadius: 7,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leafWrap: {
+    width: 14,
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leaf: {
+    width: 12,
+    height: 12,
+    borderTopLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    borderBottomLeftRadius: 2,
+    backgroundColor: colors.accent,
+    transform: [{ rotate: '-12deg' }],
+  },
+  wordmark: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.ink,
+    letterSpacing: -0.2,
+  },
+  title: {
+    fontFamily: fonts.serif,
+    fontSize: 40,
+    lineHeight: 44,
+    color: colors.ink,
+  },
+  subtitle: {
+    marginTop: 10,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.muted,
+    maxWidth: 340,
+  },
+  form: {
+    marginTop: 32,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 22,
+  },
+  link: {
+    fontSize: 13,
+    color: colors.muted,
+  },
+  linkStrong: {
+    fontSize: 13,
+    color: colors.ink,
+    fontWeight: '600',
+  },
 });

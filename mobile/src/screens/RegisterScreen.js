@@ -1,107 +1,145 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
 import { getApiErrorMessage } from '../services/apiError';
+import { Button, Chip, Field, Label, Screen, fonts } from '../components/ui';
+
+const ROLES = [
+  { value: 'citizen', label: 'Citizen' },
+  { value: 'organization', label: 'Organization' },
+  { value: 'field_agent', label: 'Field agent' },
+];
 
 export default function RegisterScreen({ navigation }) {
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
   const [role, setRole] = useState('citizen');
   const [loading, setLoading] = useState(false);
-  const register = useAuthStore((s) => s.register);
+  const register = useAuthStore((state) => state.register);
+
+  const update = (key) => (value) => setForm((current) => ({ ...current, [key]: value }));
 
   const handleRegister = async () => {
     if (!form.email || !form.password || !form.full_name) {
-      return Alert.alert('Error', 'Please fill in all required fields');
+      return Alert.alert('Missing details', 'Name, email and password are required.');
     }
     if (form.password.length < 8 || !/[A-Za-z]/.test(form.password) || !/[0-9]/.test(form.password)) {
-      return Alert.alert('Error', 'Password must be at least 8 characters and include a letter and a number');
+      return Alert.alert('Weak password', 'Use at least 8 characters, with a letter and a number.');
     }
+
     setLoading(true);
     try {
-      await register(form.email, form.password, form.full_name, form.phone, role);
+      await register(form.email, form.password, form.full_name, form.phone || undefined, role);
     } catch (err) {
-      Alert.alert('Registration Failed', getApiErrorMessage(err));
+      Alert.alert('Registration failed', getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.inner}>
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join the EcoSense community</Text>
+    <Screen scroll contentStyle={styles.content}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <Text style={styles.title}>Create your account</Text>
+        <Text style={styles.subtitle}>Choose the role that matches your work. You can start reporting right away.</Text>
 
-        <Text style={styles.roleLabel}>Choose portal</Text>
-        <View style={styles.roleRow}>
-          <TouchableOpacity
-            style={[styles.roleChip, role === 'citizen' && styles.roleChipActive]}
-            onPress={() => setRole('citizen')}
-            disabled={loading}
-          >
-            <Text style={[styles.roleChipText, role === 'citizen' && styles.roleChipTextActive]}>Citizen</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.roleChip, role === 'organization' && styles.roleChipActive]}
-            onPress={() => setRole('organization')}
-            disabled={loading}
-          >
-            <Text style={[styles.roleChipText, role === 'organization' && styles.roleChipTextActive]}>Organization</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.roleChip, role === 'field_agent' && styles.roleChipActive]}
-            onPress={() => setRole('field_agent')}
-            disabled={loading}
-          >
-            <Text style={[styles.roleChipText, role === 'field_agent' && styles.roleChipTextActive]}>Field Agent</Text>
-          </TouchableOpacity>
+        <View style={styles.roles}>
+          {ROLES.map((option) => (
+            <Chip
+              key={option.value}
+              label={option.label}
+              active={role === option.value}
+              onPress={() => setRole(option.value)}
+            />
+          ))}
         </View>
 
-        <TextInput style={styles.input} placeholder="Full Name *" value={form.full_name} onChangeText={(v) => setForm({ ...form, full_name: v })} />
-        <TextInput style={styles.input} placeholder="Email *" keyboardType="email-address" autoCapitalize="none" value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} />
-        <TextInput style={styles.input} placeholder="Phone (e.g. +254711...)" keyboardType="phone-pad" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} />
-        <TextInput style={styles.input} placeholder="Password *" secureTextEntry value={form.password} onChangeText={(v) => setForm({ ...form, password: v })} />
+        <View style={styles.form}>
+          <Label>Full name</Label>
+          <Field placeholder="Jane Wanjiku" value={form.full_name} onChangeText={update('full_name')} autoComplete="name" />
 
-        <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? 'Creating account...' : 'Register'}</Text>
-        </TouchableOpacity>
+          <Label style={{ marginTop: 16 }}>Email</Label>
+          <Field
+            placeholder="you@example.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={form.email}
+            onChangeText={update('email')}
+          />
 
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.link}>Already have an account? <Text style={styles.linkBold}>Sign In</Text></Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          <Label style={{ marginTop: 16 }}>Phone (optional)</Label>
+          <Field
+            placeholder="+254712345678"
+            keyboardType="phone-pad"
+            value={form.phone}
+            onChangeText={update('phone')}
+          />
+
+          <Label style={{ marginTop: 16 }}>Password</Label>
+          <Field
+            placeholder="At least 8 characters, with a number"
+            secureTextEntry
+            value={form.password}
+            onChangeText={update('password')}
+          />
+
+          <Button
+            label={loading ? 'Creating account' : 'Create account'}
+            loading={loading}
+            onPress={handleRegister}
+            style={{ marginTop: 24 }}
+          />
+        </View>
+
+        <Pressable onPress={() => navigation.goBack()} style={styles.linkRow}>
+          <Text style={styles.link}>Already have an account? </Text>
+          <Text style={styles.linkStrong}>Sign in</Text>
+        </Pressable>
+      </KeyboardAvoidingView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  inner: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 48 },
-  title: { fontSize: 28, fontWeight: 'bold', textAlign: 'center', color: colors.primary600 },
-  subtitle: { fontSize: 14, textAlign: 'center', color: colors.textMuted, marginBottom: 32 },
-  roleLabel: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 8 },
-  roleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-  roleChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
+  content: {
+    maxWidth: 460,
+    width: '100%',
+    alignSelf: 'center',
+    paddingTop: 24,
   },
-  roleChipActive: { backgroundColor: colors.primary600, borderColor: colors.primary600 },
-  roleChipText: { fontSize: 13, color: colors.text, fontWeight: '600' },
-  roleChipTextActive: { color: '#fff' },
-  input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border,
-    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 14, fontSize: 16, marginBottom: 12,
+  title: {
+    fontFamily: fonts.serif,
+    fontSize: 34,
+    lineHeight: 38,
+    color: colors.ink,
   },
-  button: {
-    backgroundColor: colors.primary600, borderRadius: 12, paddingVertical: 16,
-    alignItems: 'center', marginTop: 8, marginBottom: 16,
+  subtitle: {
+    marginTop: 8,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.muted,
   },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { textAlign: 'center', color: colors.textMuted, fontSize: 14 },
-  linkBold: { color: colors.primary600, fontWeight: '600' },
+  roles: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 24,
+  },
+  form: {
+    marginTop: 24,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 22,
+  },
+  link: {
+    fontSize: 13,
+    color: colors.muted,
+  },
+  linkStrong: {
+    fontSize: 13,
+    color: colors.ink,
+    fontWeight: '600',
+  },
 });

@@ -1,18 +1,22 @@
 export const colors = {
-  primary400: '#7DB152',
-  primary500: '#5DB34B',
-  primary600: '#3AA335',
-
-  background: '#F4F7F2',
+  background: '#F7F7F4',
+  bone: '#F2F1EC',
   surface: '#FFFFFF',
 
-  text: '#111827',
-  textMuted: '#6B7280',
+  ink: '#0B0F0D',
+  muted: '#626B65',
+  line: '#E3E4DD',
 
-  border: '#D1D5DB',
-  borderSubtle: '#F3F4F6',
+  accent: '#C4EF5E',
+  accentInk: '#1B2A12',
 
-  danger: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
+  danger: '#B42318',
+  warning: '#B54708',
+  info: '#175CD3',
+  success: '#027A48',
+
+  primary50: '#F4F5F3',
+  primary100: '#E8EAE6',
+  primary500: '#55605A',
+  primary600: '#333D37',
 };

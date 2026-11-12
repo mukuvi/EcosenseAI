@@ -115,6 +115,8 @@ Every assignment, status change and reward redemption creates an in-app notifica
 
 `ai/models/waste_classifier.keras` is a MobileNetV2 transfer learning model trained on the TrashNet dataset (2,527 images across cardboard, glass, metal, paper, plastic and trash). TrashNet classes are mapped to EcoSense categories: cardboard to construction, plastic to plastic, trash to mixed, and glass, metal and paper to other. Organic, electronic, hazardous, medical and textile reports keep the label the citizen chooses until a dataset covering those classes is added.
 
+Known limitation: the shipped weights are weak on plastic and metal in real photographs. A sample of real photos classified correctly for cardboard and glass but not for plastic bottles or cans. Treat the prediction as a suggestion, keep the citizen's selected type as the primary label, and retrain before relying on the classifier in production.
+
 To retrain:
 
 ```bash

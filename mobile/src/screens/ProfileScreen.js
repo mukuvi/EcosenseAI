@@ -1,95 +1,196 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
+import { Card, Divider, Screen, fonts } from '../components/ui';
+
+const menu = [
+  { label: 'Notifications', icon: 'bell', target: 'Notifications' },
+  { label: 'My reports', icon: 'file-text', target: 'Home' },
+  { label: 'Rewards', icon: 'gift', target: 'Rewards' },
+  { label: 'Report a site', icon: 'camera', target: 'Report' },
+];
 
 export default function ProfileScreen({ navigation }) {
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+    Alert.alert('Sign out', 'End this session?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: logout },
+      { text: 'Sign out', style: 'destructive', onPress: logout },
     ]);
   };
 
+  const initials = (user?.full_name || 'EC')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+
   return (
-    <View style={styles.container}>
-      <View style={styles.avatarContainer}>
+    <Screen scroll contentStyle={styles.content}>
+      <View style={styles.identity}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{user?.full_name?.charAt(0)?.toUpperCase()}</Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
         <Text style={styles.name}>{user?.full_name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
+        <View style={styles.role}>
+          <Text style={styles.roleText}>{(user?.role || 'citizen').replace('_', ' ')}</Text>
+        </View>
       </View>
 
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>⭐ {user?.points_balance || 0}</Text>
+      <Card style={styles.stats}>
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{user?.points_balance || 0}</Text>
           <Text style={styles.statLabel}>Points</Text>
         </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{user?.role}</Text>
-          <Text style={styles.statLabel}>Role</Text>
+        <View style={styles.statDivider} />
+        <View style={styles.stat}>
+          <Text style={styles.statValue}>{user?.phone || 'Not set'}</Text>
+          <Text style={styles.statLabel}>Phone</Text>
         </View>
+      </Card>
+
+      <View style={styles.menu}>
+        {menu.map((item, index) => (
+          <View key={item.label}>
+            <Pressable
+              style={({ pressed }) => [styles.menuRow, pressed && { backgroundColor: colors.primary50 }]}
+              onPress={() => navigation?.navigate(item.target)}
+            >
+              <Feather name={item.icon} size={16} color={colors.ink} />
+              <Text style={styles.menuLabel}>{item.label}</Text>
+              <Feather name="chevron-right" size={16} color={colors.muted} />
+            </Pressable>
+            {index < menu.length - 1 && <Divider />}
+          </View>
+        ))}
       </View>
 
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Notifications')}>
-          <Text style={styles.menuText}>🔔 Notifications</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Home')}>
-          <Text style={styles.menuText}>📊 My Reports</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation?.navigate('Rewards')}>
-          <Text style={styles.menuText}>🎁 Redemption History</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => Alert.alert('Settings', 'Profile settings are coming soon.')}
-        >
-          <Text style={styles.menuText}>⚙️ Settings</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.menuItem}
-          onPress={() => Alert.alert('EcoSense AI', 'Report waste, earn points, and help keep your community clean.')}
-        >
-          <Text style={styles.menuText}>ℹ️ About EcoSense AI</Text>
-        </TouchableOpacity>
-      </View>
+      <Pressable style={styles.signOut} onPress={handleLogout}>
+        <Text style={styles.signOutText}>Sign out</Text>
+      </Pressable>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+      <Text style={styles.footer}>EcoSense AI. Waste reporting and cleanup operations.</Text>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  avatarContainer: { alignItems: 'center', paddingVertical: 32, backgroundColor: colors.primary600 },
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  identity: {
+    alignItems: 'center',
+    paddingVertical: 22,
+  },
   avatar: {
-    width: 80, height: 80, borderRadius: 40, backgroundColor: colors.primary500,
-    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+    width: 64,
+    height: 64,
+    borderRadius: 14,
+    backgroundColor: colors.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  avatarText: { color: '#fff', fontSize: 32, fontWeight: 'bold' },
-  name: { color: '#fff', fontSize: 20, fontWeight: '600' },
-  email: { color: colors.background, fontSize: 14, marginTop: 2 },
-  statsRow: {
-    flexDirection: 'row', backgroundColor: '#fff', marginTop: -1,
-    paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: '#f3f4f6',
+  avatarText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '600',
   },
-  statItem: { flex: 1, alignItems: 'center' },
-  statValue: { fontSize: 18, fontWeight: '600' },
-  statLabel: { fontSize: 12, color: '#9ca3af', marginTop: 2, textTransform: 'capitalize' },
-  section: { marginTop: 16 },
-  menuItem: {
-    backgroundColor: '#fff', paddingVertical: 16, paddingHorizontal: 20,
-    borderBottomWidth: 1, borderBottomColor: '#f3f4f6',
+  name: {
+    marginTop: 14,
+    fontFamily: fonts.serif,
+    fontSize: 24,
+    color: colors.ink,
   },
-  menuText: { fontSize: 16, color: '#374151' },
-  logoutButton: {
-    marginHorizontal: 20, marginTop: 32, paddingVertical: 16,
-    borderRadius: 12, borderWidth: 1, borderColor: colors.danger, alignItems: 'center',
+  email: {
+    marginTop: 3,
+    fontSize: 13,
+    color: colors.muted,
   },
-  logoutText: { color: colors.danger, fontSize: 16, fontWeight: '600' },
+  role: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  roleText: {
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.muted,
+  },
+  stats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: colors.line,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  statLabel: {
+    marginTop: 3,
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    color: colors.muted,
+  },
+  menu: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 10,
+    backgroundColor: colors.surface,
+    overflow: 'hidden',
+  },
+  menuRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 15,
+  },
+  menuLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.ink,
+  },
+  signOut: {
+    marginTop: 22,
+    height: 46,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.line,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  signOutText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.danger,
+  },
+  footer: {
+    marginTop: 22,
+    textAlign: 'center',
+    fontSize: 11,
+    color: colors.muted,
+  },
 });

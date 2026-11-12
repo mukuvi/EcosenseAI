@@ -12,14 +12,10 @@ export default function AuthShell({ title, subtitle, children, footer, eyebrow }
   return (
     <div className="min-h-screen bg-surface lg:grid lg:grid-cols-[1.05fr_0.95fr]">
       <aside className="relative hidden overflow-hidden bg-bone p-12 lg:flex lg:flex-col xl:p-16">
-        <video
+        <img
           className="absolute inset-0 h-full w-full object-cover opacity-90"
-          src="/media/hero.mp4"
-          poster="/media/hero-poster.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
+          src="/media/hero-nairobi.jpg"
+          alt=""
           aria-hidden="true"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bone via-bone/70 to-bone/20" />

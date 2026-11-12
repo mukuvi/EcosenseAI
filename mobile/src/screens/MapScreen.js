@@ -9,7 +9,7 @@ const { width, height } = Dimensions.get('window');
 
 const NAIROBI = { latitude: -1.2921, longitude: 36.8219, latitudeDelta: 0.1, longitudeDelta: 0.1 };
 
-const SEVERITY_COLORS = { low: colors.primary500, medium: '#f59e0b', high: '#f97316', critical: '#ef4444' };
+const SEVERITY_COLORS = { low: '#AEB5AE', medium: '#B54708', high: '#B42318', critical: '#0B0F0D' };
 
 export default function MapScreen() {
   const user = useAuthStore((s) => s.user);
@@ -34,8 +34,8 @@ export default function MapScreen() {
             key={h.id}
             center={{ latitude: h.latitude, longitude: h.longitude }}
             radius={h.radius_meters || 500}
-            strokeColor="rgba(239, 68, 68, 0.6)"
-            fillColor="rgba(239, 68, 68, 0.15)"
+            strokeColor="rgba(11, 15, 13, 0.5)"
+            fillColor="rgba(11, 15, 13, 0.10)"
           />
         ))}
         {reports.map((r) => (

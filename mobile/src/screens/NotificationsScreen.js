@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import api from '../services/api';
 import { colors } from '../theme/colors';
+import { Badge, Card, Header, Screen, fonts } from '../components/ui';
 
 export default function NotificationsScreen() {
   const navigation = useNavigation();
@@ -17,7 +19,7 @@ export default function NotificationsScreen() {
   };
 
   useEffect(() => {
-    load().catch(console.error);
+    load().catch(() => {});
   }, []);
 
   const onRefresh = async () => {
@@ -29,9 +31,11 @@ export default function NotificationsScreen() {
   const openNotification = async (notification) => {
     if (!notification.read_at) {
       await api.patch(`/notifications/${notification.id}/read`);
-      setNotifications((prev) => prev.map((n) => (
-        n.id === notification.id ? { ...n, read_at: new Date().toISOString() } : n
-      )));
+      setNotifications((previous) =>
+        previous.map((item) =>
+          item.id === notification.id ? { ...item, read_at: new Date().toISOString() } : item
+        )
+      );
       setUnread((count) => Math.max(0, count - 1));
     }
 
@@ -42,61 +46,127 @@ export default function NotificationsScreen() {
 
   const markAll = async () => {
     await api.patch('/notifications/read-all');
-    setNotifications((prev) => prev.map((n) => ({ ...n, read_at: n.read_at || new Date().toISOString() })));
+    setNotifications((previous) =>
+      previous.map((item) => ({ ...item, read_at: item.read_at || new Date().toISOString() }))
+    );
     setUnread(0);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>{unread} unread</Text>
-        {unread > 0 && (
-          <TouchableOpacity onPress={markAll}>
-            <Text style={styles.markAll}>Mark all read</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+    <Screen>
+      <Header
+        title="Notifications"
+        subtitle={`${unread} unread update${unread === 1 ? '' : 's'}`}
+        right={
+          unread > 0 ? (
+            <Pressable onPress={markAll} style={styles.markAll}>
+              <Text style={styles.markAllText}>Mark read</Text>
+            </Pressable>
+          ) : null
+        }
+      />
 
       <FlatList
         data={notifications}
         keyExtractor={(item) => item.id}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary600]} />}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.ink} colors={[colors.ink]} />
+        }
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => openNotification(item)}
-            style={[styles.card, !item.read_at && styles.unreadCard]}
-          >
-            <View style={styles.cardHeader}>
-              <Text style={styles.title}>{item.title}</Text>
-              {!item.read_at && <View style={styles.dot} />}
-            </View>
-            <Text style={styles.body}>{item.body}</Text>
-            <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
-          </TouchableOpacity>
+          <Pressable onPress={() => openNotification(item)}>
+            <Card style={[styles.card, !item.read_at && styles.unread]}>
+              <View style={styles.cardTop}>
+                <Text style={styles.title}>{item.title}</Text>
+                {!item.read_at && <View style={styles.dot} />}
+              </View>
+              <Text style={styles.body}>{item.body}</Text>
+              <Text style={styles.date}>{new Date(item.created_at).toLocaleString()}</Text>
+            </Card>
+          </Pressable>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>No notifications yet.</Text>}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Feather name="bell" size={20} color={colors.muted} />
+            <Text style={styles.emptyTitle}>Nothing here yet</Text>
+            <Text style={styles.emptyBody}>
+              Status changes and verified cleanups will appear in this list.
+            </Text>
+          </View>
+        }
       />
-    </View>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 20, paddingVertical: 12, backgroundColor: '#fff',
-    borderBottomWidth: 1, borderBottomColor: colors.borderSubtle,
+  markAll: {
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
-  headerText: { fontSize: 13, color: colors.textMuted },
-  markAll: { fontSize: 13, color: colors.primary600, fontWeight: '600' },
-  list: { padding: 16 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10 },
-  unreadCard: { borderWidth: 1, borderColor: colors.primary400 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: 15, fontWeight: '600', flex: 1 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary600, marginLeft: 8 },
-  body: { fontSize: 13, color: colors.textMuted, marginTop: 4 },
-  date: { fontSize: 11, color: '#9ca3af', marginTop: 8 },
-  empty: { textAlign: 'center', color: '#9ca3af', marginTop: 40 },
+  markAllText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  list: {
+    paddingHorizontal: 20,
+    paddingBottom: 28,
+  },
+  card: {
+    marginBottom: 10,
+  },
+  unread: {
+    borderColor: colors.ink,
+  },
+  cardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.ink,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.ink,
+  },
+  body: {
+    marginTop: 6,
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.muted,
+  },
+  date: {
+    marginTop: 8,
+    fontSize: 11,
+    color: colors.muted,
+  },
+  empty: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyTitle: {
+    marginTop: 10,
+    fontFamily: fonts.serif,
+    fontSize: 20,
+    color: colors.ink,
+  },
+  emptyBody: {
+    marginTop: 6,
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.muted,
+    textAlign: 'center',
+    maxWidth: 250,
+  },
 });

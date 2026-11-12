@@ -57,7 +57,7 @@ export default function ListenButton({ reportId }) {
   return (
     <TouchableOpacity onPress={play} disabled={loading} style={styles.button}>
       {loading ? (
-        <ActivityIndicator size="small" color={colors.primary600} />
+        <ActivityIndicator size="small" color={colors.ink} />
       ) : (
         <Text style={styles.label}>Listen</Text>
       )}
@@ -68,11 +68,11 @@ export default function ListenButton({ reportId }) {
 const styles = StyleSheet.create({
   button: {
     borderWidth: 1,
-    borderColor: colors.primary600,
-    borderRadius: 16,
-    paddingHorizontal: 12,
+    borderColor: colors.line,
+    borderRadius: 6,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     alignSelf: 'flex-start',
   },
-  label: { color: colors.primary600, fontSize: 12, fontWeight: '600' },
+  label: { color: colors.ink, fontSize: 11, fontWeight: '600' },
 });

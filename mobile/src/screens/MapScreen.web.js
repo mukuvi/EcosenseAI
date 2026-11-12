@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
+import { fonts } from '../components/ui';
 
 export default function MapScreen() {
   return (
@@ -20,6 +21,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     padding: 32,
   },
-  title: { fontSize: 20, fontWeight: '600', color: colors.text, marginBottom: 8 },
-  body: { fontSize: 14, color: colors.textMuted, textAlign: 'center' },
+  title: { fontFamily: fonts.serif, fontSize: 24, color: colors.ink, marginBottom: 8 },
+  body: { fontSize: 13, lineHeight: 20, color: colors.muted, textAlign: 'center' },
 });

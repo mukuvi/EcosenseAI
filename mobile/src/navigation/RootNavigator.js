@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import useAuthStore from '../store/authStore';
 import { colors } from '../theme/colors';
+import { fonts } from '../components/ui';
 import { registerForPushNotifications } from '../services/push';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -18,86 +20,89 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const icons = {
+  Home: 'home',
+  Report: 'camera',
+  Map: 'map',
+  Rewards: 'gift',
+  Profile: 'user',
+};
+
 function MainTabs() {
   return (
     <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: colors.primary600,
-        tabBarInactiveTintColor: '#9ca3af',
-        headerStyle: { backgroundColor: colors.primary600 },
-        headerTintColor: '#fff',
-      }}
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: colors.ink,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.line,
+          borderTopWidth: 1,
+          height: 62,
+          paddingTop: 6,
+          paddingBottom: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '600',
+          marginTop: 2,
+        },
+        tabBarIcon: ({ color, size }) => (
+          <Feather name={icons[route.name] || 'circle'} size={size - 2} color={color} />
+        ),
+      })}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ tabBarIcon: () => <Text>🏠</Text>, title: 'Home' }}
-      />
-      <Tab.Screen
-        name="Report"
-        component={ReportScreen}
-        options={{ tabBarIcon: () => <Text>📸</Text>, title: 'Report Waste' }}
-      />
-      <Tab.Screen
-        name="Map"
-        component={MapScreen}
-        options={{ tabBarIcon: () => <Text>🗺️</Text>, title: 'Map' }}
-      />
-      <Tab.Screen
-        name="Rewards"
-        component={RewardsScreen}
-        options={{ tabBarIcon: () => <Text>🎁</Text>, title: 'Rewards' }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ tabBarIcon: () => <Text>👤</Text>, title: 'Profile' }}
-      />
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Report" component={ReportScreen} />
+      <Tab.Screen name="Map" component={MapScreen} />
+      <Tab.Screen name="Rewards" component={RewardsScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
 
-const stackScreenOptions = {
-  headerShown: true,
-  headerStyle: { backgroundColor: colors.primary600 },
-  headerTintColor: '#fff',
-};
-
 export default function RootNavigator() {
-  const { token, isLoading, init } = useAuthStore();
+  const token = useAuthStore((state) => state.token);
+  const init = useAuthStore((state) => state.init);
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   useEffect(() => {
     init();
-  }, []);
+  }, [init]);
 
   useEffect(() => {
-    if (token) {
-      registerForPushNotifications().catch(() => {});
-    }
+    if (token) registerForPushNotifications().catch(() => {});
   }, [token]);
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="small" color={colors.ink} />
+      </View>
+    );
+  }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerShadowVisible: false,
+        headerTintColor: colors.ink,
+        headerTitleStyle: { fontFamily: fonts.sans, fontWeight: '600', fontSize: 16 },
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
       {token ? (
         <>
-          <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen
-            name="ReportDetail"
-            component={ReportDetailScreen}
-            options={{ ...stackScreenOptions, title: 'Report details' }}
-          />
-          <Stack.Screen
-            name="Notifications"
-            component={NotificationsScreen}
-            options={{ ...stackScreenOptions, title: 'Notifications' }}
-          />
+          <Stack.Screen name="Tabs" component={MainTabs} options={{ headerShown: false }} />
+          <Stack.Screen name="ReportDetail" component={ReportDetailScreen} options={{ title: 'Report' }} />
+          <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Notifications' }} />
         </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Register" component={RegisterScreen} options={{ title: '' }} />
         </>
       )}
     </Stack.Navigator>

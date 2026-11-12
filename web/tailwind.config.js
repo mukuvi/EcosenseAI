@@ -79,6 +79,10 @@ export default {
         lift: '0 18px 40px -28px rgba(11, 15, 13, 0.35)',
       },
       keyframes: {
+        kenburns: {
+          '0%': { transform: 'scale(1) translate3d(0, 0, 0)' },
+          '100%': { transform: 'scale(1.08) translate3d(-1.5%, -1%, 0)' },
+        },
         rise: {
           '0%': { opacity: '0', transform: 'translateY(14px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -86,6 +90,7 @@ export default {
       },
       animation: {
         rise: 'rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both',
+        kenburns: 'kenburns 26s ease-in-out infinite alternate',
       },
     },
   },
